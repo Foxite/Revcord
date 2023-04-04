@@ -7,6 +7,8 @@ public class DiscordChatClient : ChatClient {
 	private readonly DiscordClient m_DSharp;
 	private readonly TaskCompletionSource m_ReadyTcs = new();
 
+	public override IUser CurrentUser => new DiscordUser(this, m_DSharp.CurrentUser);
+
 	public DiscordChatClient(DiscordConfiguration configuration) {
 		m_DSharp = new DiscordClient(configuration);
 
@@ -30,9 +32,18 @@ public class DiscordChatClient : ChatClient {
 	public async override Task<IGuild> GetGuildAsync(EntityId id) => new DiscordGuild(this, await m_DSharp.GetGuildAsync(id.Ulong()));
 	public async override Task<IUser> GetUserAsync(EntityId id) => new DiscordUser(this, await m_DSharp.GetUserAsync(id.Ulong()));
 	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId guildUser) => new DiscordMember(this, await (await m_DSharp.GetGuildAsync(guildId.Ulong())).GetMemberAsync(guildId.Ulong()));
-	public async override Task<IMessage> SendMessageAsync(EntityId channelId, string message) => new DiscordMessage(this, (await m_DSharp.SendMessageAsync(await m_DSharp.GetChannelAsync(channelId.Ulong()), message)));
 	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, string message) => new DiscordMessage(this, await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).ModifyAsync(message));
 	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).DeleteAsync();
+	
+	public async override Task<IMessage> SendMessageAsync(EntityId channelId, string message, EntityId? responseTo = null) {
+		return new DiscordMessage(this, (await m_DSharp.SendMessageAsync(await m_DSharp.GetChannelAsync(channelId.Ulong()), dmb => {
+			if (responseTo.HasValue) {
+				dmb.WithReply(responseTo.Value.Ulong());
+			}
+
+			dmb.WithContent(message);
+		})));
+	}
 }
 
 internal static class EntityIdExtensions {

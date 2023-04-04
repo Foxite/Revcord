@@ -7,6 +7,8 @@ public abstract class ChatClient {
 	public event AsyncEventHandler<ChatClient, IMessage>? MessageUpdated;
 	public event AsyncEventHandler<ChatClient, EntityId>? MessageDeleted;
 	
+	public abstract IUser CurrentUser { get; }
+	
 	public abstract Task StartAsync();
 
 	protected Task OnMessageCreated(IMessage message) => MessageCreated?.Invoke(this, message) ?? Task.CompletedTask;
@@ -20,7 +22,7 @@ public abstract class ChatClient {
 	public abstract Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId guildUser);
 	
 	// todo: message builder
-	public abstract Task<IMessage> SendMessageAsync(EntityId channelId, string message);
+	public abstract Task<IMessage> SendMessageAsync(EntityId channelId, string message, EntityId? responseTo = null);
 	public abstract Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, string message);
 	public abstract Task DeleteMessageAsync(EntityId channelId, EntityId messageId);
 }
