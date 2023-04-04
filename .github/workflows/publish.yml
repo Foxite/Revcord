@@ -1,0 +1,26 @@
+on:
+  push:
+    tags:
+    - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  # https://stackoverflow.com/a/71489231
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        # needed to get tags
+        fetch-depth: 0
+    - name: Set VERSION variable from tag
+      run: echo "VERSION=$(git tag | tail -n 1)" >> $GITHUB_ENV
+    - name: Build
+      run: dotnet build --configuration Release /p:Version=${VERSION}
+#    - name: Test
+#      run: dotnet test --configuration Release /p:Version=${VERSION} --no-build
+    - name: Pack
+      run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
+    - name: Push
+      run: |
+        dotnet nuget push Revcord.${VERSION}.nupkg --source https://nuget.repo.corsac.nl/v3/index.json --api-key ${{ secrets.PUSH_KEY }}
