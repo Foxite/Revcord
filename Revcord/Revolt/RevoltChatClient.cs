@@ -13,8 +13,8 @@ public class RevoltChatClient : ChatClient {
 	public RevoltClient Revolt { get; }
 	private readonly TaskCompletionSource m_ReadyTcs = new();
 
-	public RevoltChatClient(string token) {
-		Revolt = new RevoltClient(token, ClientMode.WebSocket);
+	public RevoltChatClient(string token, ClientConfig? config = null) {
+		Revolt = new RevoltClient(token, ClientMode.WebSocket, config!);
 
 		Revolt.OnMessageRecieved += message => OnMessageCreated(new RevoltMessage(this, message));
 		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(new EntityId(channel), new EntityId(messageId)));

@@ -1,5 +1,4 @@
 using DSharpPlus;
-using Microsoft.Extensions.Logging;
 using Revcord.Entities;
 
 namespace Revcord.Discord;
@@ -8,12 +7,8 @@ public class DiscordChatClient : ChatClient {
 	private readonly DiscordClient m_DSharp;
 	private readonly TaskCompletionSource m_ReadyTcs = new();
 
-	public DiscordChatClient(string botToken, DiscordIntents intents, ILoggerFactory? loggerFactory) {
-		m_DSharp = new DiscordClient(new DiscordConfiguration() {
-			Intents = intents,
-			LoggerFactory = loggerFactory,
-			Token = botToken
-		});
+	public DiscordChatClient(DiscordConfiguration configuration) {
+		m_DSharp = new DiscordClient(configuration);
 
 		m_DSharp.MessageCreated += (_, args) => OnMessageCreated(new DiscordMessage(this, args.Message));
 		m_DSharp.MessageUpdated += (_, args) => OnMessageUpdated(new DiscordMessage(this, args.Message));

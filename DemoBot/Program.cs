@@ -5,7 +5,10 @@ using Revcord.Revolt;
 
 string which = Environment.GetEnvironmentVariable("WHICH")!;
 ChatClient client = which switch {
-	"discord" => new DiscordChatClient(Environment.GetEnvironmentVariable("DISCORD_TOKEN")!, DiscordIntents.GuildMessages, null),
+	"discord" => new DiscordChatClient(new DiscordConfiguration() {
+		Token = Environment.GetEnvironmentVariable("DISCORD_TOKEN")!,
+		Intents = DiscordIntents.GuildMessages,
+	}),
 	"revolt" => new RevoltChatClient(Environment.GetEnvironmentVariable("REVOLT_TOKEN")!),
 };
 
