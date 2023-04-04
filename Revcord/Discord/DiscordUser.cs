@@ -17,4 +17,5 @@ public class DiscordUser : IUser {
 	public string DisplayName => m_Entity.Username;
 	public string Username => m_Entity.Username;
 	public string DiscriminatedUsername => $"{m_Entity.Username}#{m_Entity.Discriminator}";
+	public string MentionString => $"<@{m_Entity.Id}>";
 }

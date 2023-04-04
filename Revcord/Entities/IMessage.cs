@@ -9,7 +9,7 @@ public interface IMessage : IEntity {
 	IGuildMember? AuthorMember { get; }
 	EntityId AuthorId { get; }
 	
-	string Content { get; }
+	string? Content { get; }
 	
 	// TODO embed
 	// TODO attachments

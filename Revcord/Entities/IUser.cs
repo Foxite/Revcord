@@ -21,5 +21,10 @@ public interface IUser : IEntity {
 	/// </summary>
 	string DiscriminatedUsername { get; }
 	
+	/// <summary>
+	/// A string that can be included in a message to ping the user.
+	/// </summary>
+	string MentionString { get; }
+	
 	// todo: avatar
 }

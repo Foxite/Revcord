@@ -13,7 +13,7 @@ public abstract class ChatClient {
 	protected Task OnMessageUpdated(IMessage after) => MessageUpdated?.Invoke(this, after) ?? Task.CompletedTask;
 	protected Task OnMessageDeleted(EntityId id) => MessageDeleted?.Invoke(this, id) ?? Task.CompletedTask;
 
-	public abstract Task<IMessage> GetMessageAsync(EntityId id);
+	public abstract Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId);
 	public abstract Task<IChannel> GetChannelAsync(EntityId id);
 	public abstract Task<IGuild> GetGuildAsync(EntityId id);
 	public abstract Task<IUser> GetUserAsync(EntityId id);

@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Revcord", "Revcord\Revcord.csproj", "{4026D440-2C57-48CA-B24D-EE0599472CFC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoBot", "DemoBot\DemoBot.csproj", "{98F27827-9DE1-408A-BDFC-C8E562BA9AAF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{4026D440-2C57-48CA-B24D-EE0599472CFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4026D440-2C57-48CA-B24D-EE0599472CFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4026D440-2C57-48CA-B24D-EE0599472CFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98F27827-9DE1-408A-BDFC-C8E562BA9AAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98F27827-9DE1-408A-BDFC-C8E562BA9AAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98F27827-9DE1-408A-BDFC-C8E562BA9AAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98F27827-9DE1-408A-BDFC-C8E562BA9AAF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
