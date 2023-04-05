@@ -27,3 +27,35 @@ public abstract class ChatClient {
 	public abstract Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, string message);
 	public abstract Task DeleteMessageAsync(EntityId channelId, EntityId messageId);
 }
+
+public class MessageBuilder {
+	public string Content { get; set; }
+	public List<EmbedBuilder> Embeds { get; set; }
+	
+	public MessageBuilder WithContent(string content) {
+		Content = content;
+		return this;
+	}
+
+	public MessageBuilder AddEmbed(EmbedBuilder embedBuilder) {
+		Embeds.Add(embedBuilder);
+		return this;
+	}
+}
+
+public class EmbedBuilder {
+	public string Title { get; set; }
+	public string Description { get; set; }
+	public List<EmbedFieldBuilder> Fields { get; set; }
+	public string ImageUrl { get; set; }
+}
+
+public class EmbedFieldBuilder {
+	public string Title { get; set; }
+	public string Description { get; set; }
+
+	public EmbedFieldBuilder(string title, string description) {
+		Title = title;
+		Description = description;
+	}
+}
