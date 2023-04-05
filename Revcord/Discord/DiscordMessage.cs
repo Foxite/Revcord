@@ -22,7 +22,8 @@ public class DiscordMessage : IMessage {
 	public bool AuthorIsSelf => m_Entity.Author.IsCurrent;
 	public DateTimeOffset CreationTimestamp => m_Entity.CreationTimestamp;
 	public IReadOnlyCollection<IReaction> Reactions => m_Entity.Reactions.CollectionSelect(reaction => new DiscordReaction(Client, reaction));
-	
+	public string JumpLink => m_Entity.JumpLink.ToString();
+
 	public DiscordMessage(ChatClient client, DSharpMessage entity) {
 		m_Entity = entity;
 		Client = client;

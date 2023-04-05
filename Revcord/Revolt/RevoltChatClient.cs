@@ -8,9 +8,11 @@ public class RevoltChatClient : ChatClient {
 	private readonly TaskCompletionSource m_ReadyTcs = new();
 
 	public override IUser CurrentUser => new RevoltUser(this, Revolt.CurrentUser);
+	public string FrontendUrl { get; }
 
-	public RevoltChatClient(string token, ClientConfig? config = null) {
+	public RevoltChatClient(string token, ClientConfig? config = null, string frontendUrl = "https://app.revolt.chat") {
 		Revolt = new RevoltClient(token, ClientMode.WebSocket, config!);
+		FrontendUrl = frontendUrl;
 
 		Revolt.OnMessageRecieved += message => OnMessageCreated(new RevoltMessage(this, message));
 		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(new EntityId(channel), new EntityId(messageId)));

@@ -21,6 +21,9 @@ public class RevoltMessage : IMessage {
 	public DateTimeOffset CreationTimestamp => Ulid.Parse(m_Entity.Id).Time;
 	public IReadOnlyCollection<IReaction> Reactions => m_Entity is UserMessage um ? um.Reactions.CollectionSelect(kvp => new RevoltReaction(Client, new RevoltEmoji(Client, kvp.Key), kvp.Value.Length)) : Array.Empty<IReaction>();
 	
+	// TODO handle different instances
+	public string JumpLink => $"{Client.FrontendUrl}/{(m_Entity.Channel is ServerChannel sc ? $"server/{sc.ServerId}/" : "")}channel/{m_Entity.Channel.Id}/{m_Entity.Id}";
+
 	public RevoltMessage(RevoltChatClient client, Message entity) {
 		Client = client;
 		m_Entity = entity;

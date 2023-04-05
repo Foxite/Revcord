@@ -18,4 +18,9 @@ public interface IMessage : IEntity {
 	bool AuthorIsSelf { get; }
 	DateTimeOffset CreationTimestamp { get; }
 	IReadOnlyCollection<IReaction> Reactions { get; }
+	
+	/// <summary>
+	/// A link that can be sent to a user. When the user clicks the link, they will be taken to the message.
+	/// </summary>
+	string JumpLink { get; }
 }
