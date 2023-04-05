@@ -36,7 +36,7 @@ public class RevoltChatClient : ChatClient {
 	public override Task<IChannel> GetChannelAsync(EntityId id) => Task.FromResult<IChannel>(new RevoltChannel(this, Revolt.GetChannel(id.String())));
 	public override Task<IGuild> GetGuildAsync(EntityId id) => Task.FromResult<IGuild>(new RevoltGuild(this, Revolt.GetServer(id.String())));
 	public override Task<IUser> GetUserAsync(EntityId id) => Task.FromResult<IUser>(new RevoltUser(this, Revolt.GetUser(id.String())));
-	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId guildUser) => new RevoltGuildMember(this, await Revolt.Rest.GetMemberAsync(guildId.String(), guildUser.String()));
+	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) => new RevoltGuildMember(this, await Revolt.Rest.GetMemberAsync(guildId.String(), userId.String()));
 	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, string message) => new RevoltMessage(this, await Revolt.Rest.EditMessageAsync(channelId.String(), messageId.String(), new Option<string>(message)));
 	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) => await Revolt.Rest.DeleteMessageAsync(channelId.String(), messageId.String());
 	public async override Task<IMessage> SendMessageAsync(EntityId channelId, string message, EntityId? responseTo = null) => new RevoltMessage(this, await Revolt.Rest.SendMessageAsync(channelId.String(), message)); // TODO replies (waiting on https://github.com/xXBuilderBXx/RevoltSharp/pull/8)

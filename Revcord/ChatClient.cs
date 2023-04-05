@@ -19,7 +19,8 @@ public abstract class ChatClient {
 	public abstract Task<IChannel> GetChannelAsync(EntityId id);
 	public abstract Task<IGuild> GetGuildAsync(EntityId id);
 	public abstract Task<IUser> GetUserAsync(EntityId id);
-	public abstract Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId guildUser);
+	public abstract Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId);
+	// todo: get dm channel with user
 	
 	// todo: message builder
 	public abstract Task<IMessage> SendMessageAsync(EntityId channelId, string message, EntityId? responseTo = null);

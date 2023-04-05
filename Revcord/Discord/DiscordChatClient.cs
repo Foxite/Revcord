@@ -31,7 +31,7 @@ public class DiscordChatClient : ChatClient {
 	public async override Task<IChannel> GetChannelAsync(EntityId id) => new DiscordChannel(this, await m_DSharp.GetChannelAsync(id.Ulong()));
 	public async override Task<IGuild> GetGuildAsync(EntityId id) => new DiscordGuild(this, await m_DSharp.GetGuildAsync(id.Ulong()));
 	public async override Task<IUser> GetUserAsync(EntityId id) => new DiscordUser(this, await m_DSharp.GetUserAsync(id.Ulong()));
-	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId guildUser) => new DiscordMember(this, await (await m_DSharp.GetGuildAsync(guildId.Ulong())).GetMemberAsync(guildId.Ulong()));
+	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) => new DiscordMember(this, await (await m_DSharp.GetGuildAsync(guildId.Ulong())).GetMemberAsync(guildId.Ulong()));
 	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, string message) => new DiscordMessage(this, await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).ModifyAsync(message));
 	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).DeleteAsync();
 	
