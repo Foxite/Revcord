@@ -21,8 +21,8 @@ public class RevoltChatClient : ChatClient {
 		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(new EntityId(channel), new EntityId(messageId)));
 		Revolt.OnMessageDeleted += (channel, id) => OnMessageDeleted(new EntityId(id)); // parameter names inferred
 
-		Revolt.OnReactionAdded += (emoji, channel, member, message) => OnReactionAdded(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
-		Revolt.OnReactionRemoved += (emoji, channel, member, message) => OnReactionRemoved(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
+		//Revolt.OnReactionAdded += (emoji, channel, member, message) => OnReactionAdded(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
+		//Revolt.OnReactionRemoved += (emoji, channel, member, message) => OnReactionRemoved(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
 
 		Revolt.OnWebSocketError += error => OnClientError(new RevoltException(error.Messaage, (int) error.Type));
 	}
