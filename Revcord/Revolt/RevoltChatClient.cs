@@ -21,6 +21,8 @@ public class RevoltChatClient : ChatClient {
 		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(new EntityId(channel), new EntityId(messageId)));
 		Revolt.OnMessageDeleted += (channel, id) => OnMessageDeleted(new EntityId(id)); // parameter names inferred
 
+		Revolt.OnReactionAdded += (emoji, channel, member) => OnReactionAdded(new RevoltMessage(this, null), new RevoltEmoji(this, emoji));
+		Revolt.OnReactionRemoved += (emoji, channel, member) => OnReactionRemoved(new RevoltMessage(this, null), new RevoltEmoji(this, emoji));
 		//Revolt.OnReactionAdded += (emoji, channel, member, message) => OnReactionAdded(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
 		//Revolt.OnReactionRemoved += (emoji, channel, member, message) => OnReactionRemoved(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
 
@@ -80,15 +82,17 @@ public class RevoltChatClient : ChatClient {
 
 	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) {
 		ServerMember member;
+		Server server;
 		try {
 			member = await Revolt.Rest.GetMemberAsync(guildId.String(), userId.String());
+			server = await Revolt.Rest.GetServerAsync(guildId.String());
 		} catch (NullReferenceException) {
 			throw new EntityNotFoundException(this, null);
 		} catch (RevoltRestException ex) {
 			throw new ChatClientException(this, "RevoltSharp threw an exception", ex);
 		}
 
-		return new RevoltGuildMember(this, member);
+		return new RevoltGuildMember(this, member, server);
 	}
 
 	public async override Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null) {
