@@ -1,6 +1,12 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using Revcord.Entities;
+using SharpGuild   = DSharpPlus.Entities.DiscordGuild;
+using SharpChannel = DSharpPlus.Entities.DiscordChannel;
+using SharpMessage = DSharpPlus.Entities.DiscordMessage;
+using SharpUser	   = DSharpPlus.Entities.DiscordUser;
+using SharpMember  = DSharpPlus.Entities.DiscordMember;
 
 namespace Revcord.Discord;
 
@@ -31,19 +37,126 @@ public class DiscordChatClient : ChatClient {
 		await m_ReadyTcs.Task;
 	}
 
-	// todo: almost all of these do an api call because dsharpplus has a stupid abstraction and doesn't expose its rest client. to fix this, replace dsharpplus with something else
-	public async override Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId) => new DiscordMessage(this, await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong()));
-	public async override Task<IChannel> GetChannelAsync(EntityId id) => new DiscordChannel(this, await m_DSharp.GetChannelAsync(id.Ulong()));
-	public async override Task<IGuild> GetGuildAsync(EntityId id) => new DiscordGuild(this, await m_DSharp.GetGuildAsync(id.Ulong()));
-	public async override Task<IUser> GetUserAsync(EntityId id) => new DiscordUser(this, await m_DSharp.GetUserAsync(id.Ulong()));
-	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) => new DiscordMember(this, await (await m_DSharp.GetGuildAsync(guildId.Ulong())).GetMemberAsync(guildId.Ulong()));
-	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, MessageBuilder messageBuilder) => new DiscordMessage(this, await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).ModifyAsync(GetDiscordMessageBuilder(messageBuilder, null)));
-	public async override Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null) => new DiscordMessage(this, (await m_DSharp.SendMessageAsync(await m_DSharp.GetChannelAsync(channelId.Ulong()), GetDiscordMessageBuilder(messageBuilder, responseTo))));
-	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).DeleteAsync();
-	public async override Task AddReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).CreateReactionAsync(((DiscordEmoji) emoji).Entity);
-	public async override Task RemoveReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).DeleteOwnReactionAsync(((DiscordEmoji) emoji).Entity);
+	// todo: almost all of these do multiple api call because dsharpplus has a stupid abstraction and doesn't expose its rest client. to fix this, replace dsharpplus with something else
+	public async override Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId) {
+		try {
+			SharpChannel channel = await m_DSharp.GetChannelAsync(channelId.Ulong());
+			SharpMessage message = await channel.GetMessageAsync(messageId.Ulong());
+			return new DiscordMessage(this, message);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
 
-	private Action<DiscordMessageBuilder> GetDiscordMessageBuilder(MessageBuilder messageBuilder, EntityId? responseTo) {
+	public async override Task<IChannel> GetChannelAsync(EntityId id) {
+		try {
+			SharpChannel channel = await m_DSharp.GetChannelAsync(id.Ulong());
+			return new DiscordChannel(this, channel);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task<IGuild> GetGuildAsync(EntityId id) {
+		try {
+			SharpGuild guild = await m_DSharp.GetGuildAsync(id.Ulong());
+			return new DiscordGuild(this, guild);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task<IUser> GetUserAsync(EntityId id) {
+		try {
+			SharpUser user = await m_DSharp.GetUserAsync(id.Ulong());
+			return new DiscordUser(this, user);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) {
+		try {
+			SharpGuild guild = await m_DSharp.GetGuildAsync(guildId.Ulong());
+			SharpMember member = await guild.GetMemberAsync(guildId.Ulong());
+			return new DiscordMember(this, member);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, MessageBuilder messageBuilder) {
+		try {
+			SharpChannel channel = await m_DSharp.GetChannelAsync(channelId.Ulong());
+			SharpMessage message = await channel.GetMessageAsync(messageId.Ulong());
+			SharpMessage updatedMessage = await message.ModifyAsync(GetDiscordMessageBuilder(messageBuilder, null));
+			return new DiscordMessage(this, updatedMessage);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null) {
+		try {
+			SharpChannel channel = await m_DSharp.GetChannelAsync(channelId.Ulong());
+			SharpMessage message = await m_DSharp.SendMessageAsync(channel, GetDiscordMessageBuilder(messageBuilder, responseTo));
+			return new DiscordMessage(this, message);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) {
+		try {
+			SharpChannel channel = await m_DSharp.GetChannelAsync(channelId.Ulong());
+			SharpMessage message = await channel.GetMessageAsync(messageId.Ulong());
+			await message.DeleteAsync();
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task AddReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji) {
+		try {
+			SharpChannel channel = await m_DSharp.GetChannelAsync(channelId.Ulong());
+			SharpMessage message = await channel.GetMessageAsync(messageId.Ulong());
+			await message.CreateReactionAsync(((DiscordEmoji) emoji).Entity);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	public async override Task RemoveReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji) {
+		try {
+			SharpChannel channel = await m_DSharp.GetChannelAsync(channelId.Ulong());
+			SharpMessage message = await channel.GetMessageAsync(messageId.Ulong());
+			await message.DeleteOwnReactionAsync(((DiscordEmoji) emoji).Entity);
+		} catch (NotFoundException ex) {
+			throw new EntityNotFoundException(this, ex);
+		} catch (DiscordException ex) {
+			throw new ChatClientException(this, "DSharpPlus threw an exception", ex);
+		}
+	}
+
+	private static Action<DiscordMessageBuilder> GetDiscordMessageBuilder(MessageBuilder messageBuilder, EntityId? responseTo) {
 		return dmb => {
 			if (responseTo.HasValue) {
 				dmb.WithReply(responseTo.Value.Ulong());

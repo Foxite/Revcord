@@ -39,7 +39,13 @@ public record ReactionModifiedArgs(
 	bool Added
 ) : ChatClientEventArgs;
 
+public record HandlerErrorArgs(
+	ChatClient Sender,
+	string EventName,
+	Exception Exception
+) : ChatClientEventArgs;
+
 public record ClientErrorArgs(
 	ChatClient Sender,
-	Exception Exception
+	ChatClientException Exception
 ) : ChatClientEventArgs;

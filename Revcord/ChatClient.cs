@@ -1,4 +1,5 @@
-﻿using Revcord.Entities;
+﻿using System.Reflection;
+using Revcord.Entities;
 
 namespace Revcord;
 
@@ -9,32 +10,32 @@ public abstract class ChatClient {
 	public event AsyncEventHandler<ReactionModifiedArgs>? ReactionAdded;
 	public event AsyncEventHandler<ReactionModifiedArgs>? ReactionRemoved;
 	public event AsyncEventHandler<ClientErrorArgs>? ClientError;
-	public event AsyncEventHandler<ClientErrorArgs>? EventHandlerError;
+	public event AsyncEventHandler<HandlerErrorArgs>? EventHandlerError;
 	
 	public abstract IUser CurrentUser { get; }
 	
 	public abstract Task StartAsync();
 
-	private async Task HandleHandlerError<T>(AsyncEventHandler<T>? @event, T args) where T : ChatClientEventArgs {
+	private async Task HandleHandlerError<T>(AsyncEventHandler<T>? @event, string eventName, T args) where T : ChatClientEventArgs {
 		try {
 			if (@event != null) {
 				await @event.Invoke(args);
 			}
 		} catch (Exception e) {
 			if (EventHandlerError != null) {
-				await EventHandlerError(new ClientErrorArgs(this, e));
+				await EventHandlerError(new HandlerErrorArgs(this, eventName, e));
 			}
 		}
 	}
 
-	protected Task OnMessageCreated(IMessage message) => HandleHandlerError(MessageCreated, new MessageCreatedArgs(this, message));
-	protected Task OnMessageUpdated(IMessage after) => HandleHandlerError(MessageUpdated, new MessageUpdatedArgs(this, after));
-	protected Task OnMessageDeleted(EntityId id) => HandleHandlerError(MessageDeleted, new MessageDeletedArgs(this, id));
+	protected Task OnMessageCreated(IMessage message) => HandleHandlerError(MessageCreated, "MessageCreated", new MessageCreatedArgs(this, message));
+	protected Task OnMessageUpdated(IMessage after) => HandleHandlerError(MessageUpdated, "MessageUpdated", new MessageUpdatedArgs(this, after));
+	protected Task OnMessageDeleted(EntityId id) => HandleHandlerError(MessageDeleted, "MessageDeleted", new MessageDeletedArgs(this, id));
 	
-	protected Task OnReactionAdded(IMessage message, IEmoji emoji) => HandleHandlerError(ReactionAdded, new ReactionModifiedArgs(this, message, emoji, true));
-	protected Task OnReactionRemoved(IMessage message, IEmoji emoji) => HandleHandlerError(ReactionRemoved, new ReactionModifiedArgs(this, message, emoji, false));
+	protected Task OnReactionAdded(IMessage message, IEmoji emoji) => HandleHandlerError(ReactionAdded, "ReactionAdded", new ReactionModifiedArgs(this, message, emoji, true));
+	protected Task OnReactionRemoved(IMessage message, IEmoji emoji) => HandleHandlerError(ReactionRemoved, "ReactionRemoved", new ReactionModifiedArgs(this, message, emoji, false));
 	
-	protected Task OnClientError(Exception exception) => ClientError?.Invoke(new ClientErrorArgs(this, exception)) ?? Task.CompletedTask;
+	protected Task OnClientError(Exception exception) => ClientError?.Invoke(new ClientErrorArgs(this, new ChatClientException(this, "An exception was thrown by the underlying chat client", exception))) ?? Task.CompletedTask;
 
 	public abstract Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId);
 	public abstract Task<IChannel> GetChannelAsync(EntityId id);
