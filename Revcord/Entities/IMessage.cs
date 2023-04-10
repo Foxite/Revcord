@@ -15,7 +15,7 @@ public interface IMessage : IEntity {
 	// TODO attachments
 	// todo: type
 
-	bool AuthorIsSelf { get; }
+	bool AuthorIsSelf => Author.IsSelf;
 	DateTimeOffset CreationTimestamp { get; }
 	IReadOnlyCollection<IReaction> Reactions { get; }
 	
@@ -23,4 +23,6 @@ public interface IMessage : IEntity {
 	/// A link that can be sent to a user. When the user clicks the link, they will be taken to the message.
 	/// </summary>
 	string JumpLink { get; }
+	
+	bool IsSystemMessage { get; }
 }

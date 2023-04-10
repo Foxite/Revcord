@@ -15,6 +15,7 @@ public class RevoltUser : IUser {
 	public string DiscriminatedUsername => m_Entity.Username;
 	public string MentionString => $"<@{m_Entity.Id}>";
 	public string AvatarUrl => Client.AutumnUrl + "/avatars/" + m_Entity.Avatar.Id;
+	public bool IsBot => m_Entity.IsBot;
 
 	public RevoltUser(RevoltChatClient client, User entity) {
 		Client = client;

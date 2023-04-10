@@ -1,3 +1,4 @@
+using DSharpPlus;
 using Revcord.Entities;
 using DSharpMessage  = DSharpPlus.Entities.DiscordMessage;
 using DSharpMember   = DSharpPlus.Entities.DiscordMember;
@@ -23,6 +24,7 @@ public class DiscordMessage : IMessage {
 	public DateTimeOffset CreationTimestamp => m_Entity.CreationTimestamp;
 	public IReadOnlyCollection<IReaction> Reactions => m_Entity.Reactions.CollectionSelect(reaction => new DiscordReaction(Client, reaction));
 	public string JumpLink => m_Entity.JumpLink.ToString();
+	public bool IsSystemMessage => m_Entity.MessageType is not (MessageType.Default or MessageType.Reply);
 
 	public DiscordMessage(ChatClient client, DSharpMessage entity) {
 		m_Entity = entity;

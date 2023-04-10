@@ -30,4 +30,6 @@ public interface IUser : IEntity {
 	/// Url to the user's avatar.
 	/// </summary>
 	string AvatarUrl { get; }
+	
+	bool IsBot { get; }
 }

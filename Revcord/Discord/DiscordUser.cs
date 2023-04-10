@@ -13,6 +13,7 @@ public class DiscordUser : IUser {
 	public string DiscriminatedUsername => $"{m_Entity.Username}#{m_Entity.Discriminator}";
 	public string MentionString => $"<@{m_Entity.Id}>";
 	public string AvatarUrl => m_Entity.AvatarUrl;
+	public bool IsBot => m_Entity.IsBot;
 
 	public DiscordUser(ChatClient chatClient, DSharpPlus.Entities.DiscordUser entity) {
 		m_Entity = entity;
