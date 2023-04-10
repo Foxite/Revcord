@@ -17,7 +17,7 @@ public class RevoltMessage : IMessage {
 	public IUser Author => new RevoltUser(Client, m_Entity.Author);
 	public IGuildMember? AuthorMember => m_Entity.Channel is ServerChannel sc ? new RevoltGuildMember(Client, sc.Server.GetCachedMember(m_Entity.AuthorId)) : null;
 	public string? Content => (m_Entity as UserMessage)?.Content;
-	public bool AuthorIsSelf => m_Entity.Author.Client.CurrentUser.Id == m_Entity.Id;
+	public bool AuthorIsSelf => m_Entity.Author.Client.CurrentUser.Id == m_Entity.AuthorId;
 	public DateTimeOffset CreationTimestamp => Ulid.Parse(m_Entity.Id).Time;
 	public IReadOnlyCollection<IReaction> Reactions => m_Entity is UserMessage um ? um.Reactions.CollectionSelect(kvp => new RevoltReaction(Client, new RevoltEmoji(Client, kvp.Key), kvp.Value.Length)) : Array.Empty<IReaction>();
 	

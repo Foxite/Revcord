@@ -13,7 +13,7 @@
     <ItemGroup>
       <PackageReference Include="DSharpPlus" Version="4.4.0" />
       <PackageReference Include="Foxite.Common" Version="1.9.0" />
-      <PackageReference Include="RevoltSharp" Version="4.0.5" />
+      <PackageReference Include="RevoltSharp" Version="4.0.6" />
       <PackageReference Include="Ulid" Version="1.2.6" />
     </ItemGroup>
 
