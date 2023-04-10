@@ -25,6 +25,9 @@ public interface IUser : IEntity {
 	/// A string that can be included in a message to ping the user.
 	/// </summary>
 	string MentionString { get; }
-	
-	// todo: avatar
+
+	/// <summary>
+	/// Url to the user's avatar.
+	/// </summary>
+	string AvatarUrl { get; }
 }

@@ -1,4 +1,5 @@
 using DSharpPlus;
+using DSharpPlus.Entities;
 using Revcord.Entities;
 
 namespace Revcord.Discord;
@@ -32,17 +33,43 @@ public class DiscordChatClient : ChatClient {
 	public async override Task<IGuild> GetGuildAsync(EntityId id) => new DiscordGuild(this, await m_DSharp.GetGuildAsync(id.Ulong()));
 	public async override Task<IUser> GetUserAsync(EntityId id) => new DiscordUser(this, await m_DSharp.GetUserAsync(id.Ulong()));
 	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) => new DiscordMember(this, await (await m_DSharp.GetGuildAsync(guildId.Ulong())).GetMemberAsync(guildId.Ulong()));
-	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, string message) => new DiscordMessage(this, await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).ModifyAsync(message));
 	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).DeleteAsync();
 	
-	public async override Task<IMessage> SendMessageAsync(EntityId channelId, string message, EntityId? responseTo = null) {
-		return new DiscordMessage(this, (await m_DSharp.SendMessageAsync(await m_DSharp.GetChannelAsync(channelId.Ulong()), dmb => {
+	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, MessageBuilder messageBuilder) {
+		return new DiscordMessage(this, await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).ModifyAsync(dmb => {
+			
+		}));
+	}
+
+	public async override Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null) {
+		return new DiscordMessage(this, (await m_DSharp.SendMessageAsync(await m_DSharp.GetChannelAsync(channelId.Ulong()), GetDiscordMessageBuilder(messageBuilder, responseTo))));
+	}
+
+	private Action<DiscordMessageBuilder> GetDiscordMessageBuilder(MessageBuilder messageBuilder, EntityId? responseTo) {
+		return dmb => {
 			if (responseTo.HasValue) {
 				dmb.WithReply(responseTo.Value.Ulong());
 			}
 
-			dmb.WithContent(message);
-		})));
+			dmb.WithContent(messageBuilder.Content);
+
+			foreach (EmbedBuilder embed in messageBuilder.Embeds) {
+				dmb.AddEmbed(BuildEmbed(embed));
+			}
+		};
+	}
+
+	private static DiscordEmbed BuildEmbed(EmbedBuilder embed) {
+		return new DiscordEmbedBuilder() {
+			Title = embed.Title,
+			Description = embed.Description,
+			Color = new DiscordColor(embed.Color.R, embed.Color.G, embed.Color.B),
+			ImageUrl = embed.ImageUrl,
+			Url = embed.Url,
+			Author = new DiscordEmbedBuilder.EmbedAuthor() {
+				IconUrl = embed.IconUrl
+			}
+		}.Build();
 	}
 }
 

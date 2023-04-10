@@ -1,5 +1,6 @@
 using Revcord.Entities;
 using RevoltSharp;
+using EmbedBuilderSharp = RevoltSharp.EmbedBuilder;
 
 namespace Revcord.Revolt; 
 
@@ -9,8 +10,9 @@ public class RevoltChatClient : ChatClient {
 
 	public override IUser CurrentUser => new RevoltUser(this, Revolt.CurrentUser);
 	public string FrontendUrl { get; }
+	public string AutumnUrl { get; }
 
-	public RevoltChatClient(string token, ClientConfig? config = null, string frontendUrl = "https://app.revolt.chat") {
+	public RevoltChatClient(string token, ClientConfig? config = null, string frontendUrl = "https://app.revolt.chat", string autumnUrl = "https://autumn.revolt.chat") {
 		Revolt = new RevoltClient(token, ClientMode.WebSocket, config!);
 		FrontendUrl = frontendUrl;
 
@@ -37,7 +39,18 @@ public class RevoltChatClient : ChatClient {
 	public override Task<IGuild> GetGuildAsync(EntityId id) => Task.FromResult<IGuild>(new RevoltGuild(this, Revolt.GetServer(id.String())));
 	public override Task<IUser> GetUserAsync(EntityId id) => Task.FromResult<IUser>(new RevoltUser(this, Revolt.GetUser(id.String())));
 	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) => new RevoltGuildMember(this, await Revolt.Rest.GetMemberAsync(guildId.String(), userId.String()));
-	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, string message) => new RevoltMessage(this, await Revolt.Rest.EditMessageAsync(channelId.String(), messageId.String(), new Option<string>(message)));
+	public async override Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null) => new RevoltMessage(this, await Revolt.Rest.SendMessageAsync(channelId.String(), messageBuilder.Content, embeds: messageBuilder.Embeds.Count == 0 ? null! : messageBuilder.Embeds.Select(BuildEmbed).ToArray(), replies: responseTo == null ? default! : new [] { new MessageReply() { id = responseTo.Value.String(), mention = false } }));
+	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, MessageBuilder messageBuilder) => new RevoltMessage(this, await Revolt.Rest.EditMessageAsync(channelId.String(), messageId.String(), new Option<string>(messageBuilder.Content), new Option<Embed[]>(messageBuilder.Embeds.Select(BuildEmbed).ToArray())));
 	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) => await Revolt.Rest.DeleteMessageAsync(channelId.String(), messageId.String());
-	public async override Task<IMessage> SendMessageAsync(EntityId channelId, string message, EntityId? responseTo = null) => new RevoltMessage(this, await Revolt.Rest.SendMessageAsync(channelId.String(), message, replies: responseTo == null ? default! : new [] { new MessageReply() { id = responseTo.Value.String(), mention = false } }));
+
+	private static Embed BuildEmbed(EmbedBuilder embedBuilder) {
+		return new EmbedBuilderSharp() {
+			Title = embedBuilder.Title,
+			Description = embedBuilder.Description,
+			Color = new RevoltColor(embedBuilder.Color.R, embedBuilder.Color.G, embedBuilder.Color.B),
+			IconUrl = embedBuilder.IconUrl,
+			Image = embedBuilder.ImageUrl,
+			Url = embedBuilder.Url
+		}.Build();
+	}
 }
