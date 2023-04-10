@@ -1,11 +1,8 @@
 namespace Revcord.Entities;
 
-public interface IEmoji : IChatServiceObject, IEquatable<IEmoji> {
+public interface IEmoji : IEntity, IEquatable<IEmoji> {
 	bool IsAnimated { get; }
 	
-	/// <summary>
-	/// The name of the emote if a customized emote; the unicode if an emoji.
-	/// </summary>
 	string Name { get; }
 	
 	bool IsCustomizedEmote { get; }

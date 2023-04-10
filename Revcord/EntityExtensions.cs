@@ -16,7 +16,9 @@ public static class EntityExtensions {
 
 	public static Task<IMessage> UpdateAsync(this IMessage message, MessageBuilder messageBuilder) => message.Client.UpdateMessageAsync(message.ChannelId, message.Id, messageBuilder);
 	public static Task<IMessage> UpdateAsync(this IMessage message, string content) => message.Client.UpdateMessageAsync(message.ChannelId, message.Id, new MessageBuilder().WithContent(content));
-	
+
+	public static Task AddReactionAsync(this IMessage message, IEmoji emoji) => message.Client.AddReactionAsync(message.ChannelId, message.Id, emoji);
+	public static Task RemoveReactionAsync(this IMessage message, IEmoji emoji) => message.Client.RemoveReactionAsync(message.ChannelId, message.Id, emoji);
 	
 	public static Task DeleteAsync(this IMessage message) => message.Client.DeleteMessageAsync(message.ChannelId, message.Id);
 	public static Task<IMessage> GetMessageAsync(this IChannel channel, EntityId messageId) => channel.Client.GetMessageAsync(channel.Id, messageId);

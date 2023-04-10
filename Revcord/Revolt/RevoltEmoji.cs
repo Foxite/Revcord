@@ -8,6 +8,7 @@ public class RevoltEmoji : IEmoji {
 
 	public RevoltChatClient Client { get; }
 	ChatClient IChatServiceObject.Client => Client;
+	public EntityId Id => new EntityId(m_Entity.Id);
 	public bool IsAnimated => m_Entity.IsAnimated;
 	public string Name => m_Entity.Name; // TODO: test req about unicode emojis
 	public bool IsCustomizedEmote => m_Entity.IsServerEmoji;

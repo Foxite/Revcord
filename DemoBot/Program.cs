@@ -1,11 +1,10 @@
 ﻿using System.Drawing;
-using DSharpPlus;
 using Revcord;
-using Revcord.Discord;
 using Revcord.Entities;
-using Revcord.Revolt;
 
-async Task HandleMessage(ChatClient client, IMessage message) {
+async Task HandleMessage(MessageCreatedArgs args) {
+	IMessage message = args.Message;
+	
 	if (message.AuthorIsSelf) {
 		return;
 	}
@@ -13,7 +12,7 @@ async Task HandleMessage(ChatClient client, IMessage message) {
 	if (message.Content != null) {
 		string lowerContent = message.Content.ToLower();
 		if (lowerContent.StartsWith("ping")) {
-			await client.SendMessageAsync(message.Channel, "Pong!");
+			await args.Client.SendMessageAsync(message.Channel, "Pong!");
 		} else if (lowerContent.StartsWith("reply")) {
 			await message.SendReplyAsync("Reply!");
 		} else if (lowerContent.StartsWith("mention")) {
@@ -33,21 +32,31 @@ async Task HandleMessage(ChatClient client, IMessage message) {
 	}
 }
 
+async Task HandleReactionModified(ReactionModifiedArgs args) {
+	if (args.Added) {
+		await args.Message.AddReactionAsync(args.Emoji);
+	} else {
+		await args.Message.RemoveReactionAsync(args.Emoji);
+	}
+}
+
 
 string whichEnv = Environment.GetEnvironmentVariable("WHICH")!;
 
 foreach (var which in whichEnv.Split(";")) {
 	ChatClient client = which switch {
-		"discord" => new DiscordChatClient(new DiscordConfiguration() {
+		"discord" => new Revcord.Discord.DiscordChatClient(new DSharpPlus.DiscordConfiguration() {
 			Token = Environment.GetEnvironmentVariable("DISCORD_TOKEN")!,
-			Intents = DiscordIntents.GuildMessages | DiscordIntents.MessageContents,
+			Intents = DSharpPlus.DiscordIntents.GuildMessages | DSharpPlus.DiscordIntents.MessageContents | DSharpPlus.DiscordIntents.GuildMessageReactions,
 		}),
-		"revolt" => new RevoltChatClient(Environment.GetEnvironmentVariable("REVOLT_TOKEN")!),
+		"revolt" => new Revcord.Revolt.RevoltChatClient(Environment.GetEnvironmentVariable("REVOLT_TOKEN")!),
 	};
 
 	await client.StartAsync();
 
 	client.MessageCreated += HandleMessage;
+	client.ReactionAdded += HandleReactionModified;
+	client.ReactionRemoved += HandleReactionModified;
 }
 
 Console.WriteLine("Hello, World!");

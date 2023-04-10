@@ -1,3 +1,3 @@
 namespace Revcord;
 
-public delegate Task AsyncEventHandler<in TSender, in TArgs>(TSender sender, TArgs args);
+public delegate Task AsyncEventHandler<in TArgs>(TArgs args) where TArgs : ChatClientEventArgs;

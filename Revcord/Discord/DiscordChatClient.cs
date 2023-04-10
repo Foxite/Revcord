@@ -16,6 +16,10 @@ public class DiscordChatClient : ChatClient {
 		m_DSharp.MessageCreated += (_, args) => OnMessageCreated(new DiscordMessage(this, args.Message));
 		m_DSharp.MessageUpdated += (_, args) => OnMessageUpdated(new DiscordMessage(this, args.Message));
 		m_DSharp.MessageDeleted += (_, args) => OnMessageDeleted(new EntityId(args.Message.Id));
+		m_DSharp.MessageReactionAdded += (_, args) => OnReactionAdded(new DiscordMessage(this, args.Message), new DiscordEmoji(this, args.Emoji));
+		m_DSharp.MessageReactionRemoved += (_, args) => OnReactionRemoved(new DiscordMessage(this, args.Message), new DiscordEmoji(this, args.Emoji));
+		m_DSharp.ClientErrored += (_, args) => OnClientError(args.Exception);
+		m_DSharp.SocketErrored += (_, args) => OnClientError(args.Exception);
 	}
 
 	public async override Task StartAsync() {
@@ -33,17 +37,11 @@ public class DiscordChatClient : ChatClient {
 	public async override Task<IGuild> GetGuildAsync(EntityId id) => new DiscordGuild(this, await m_DSharp.GetGuildAsync(id.Ulong()));
 	public async override Task<IUser> GetUserAsync(EntityId id) => new DiscordUser(this, await m_DSharp.GetUserAsync(id.Ulong()));
 	public async override Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId) => new DiscordMember(this, await (await m_DSharp.GetGuildAsync(guildId.Ulong())).GetMemberAsync(guildId.Ulong()));
+	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, MessageBuilder messageBuilder) => new DiscordMessage(this, await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).ModifyAsync(GetDiscordMessageBuilder(messageBuilder, null)));
+	public async override Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null) => new DiscordMessage(this, (await m_DSharp.SendMessageAsync(await m_DSharp.GetChannelAsync(channelId.Ulong()), GetDiscordMessageBuilder(messageBuilder, responseTo))));
 	public async override Task DeleteMessageAsync(EntityId channelId, EntityId messageId) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).DeleteAsync();
-	
-	public async override Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, MessageBuilder messageBuilder) {
-		return new DiscordMessage(this, await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).ModifyAsync(dmb => {
-			
-		}));
-	}
-
-	public async override Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null) {
-		return new DiscordMessage(this, (await m_DSharp.SendMessageAsync(await m_DSharp.GetChannelAsync(channelId.Ulong()), GetDiscordMessageBuilder(messageBuilder, responseTo))));
-	}
+	public async override Task AddReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).CreateReactionAsync(((DiscordEmoji) emoji).Entity);
+	public async override Task RemoveReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji) => await (await (await m_DSharp.GetChannelAsync(channelId.Ulong())).GetMessageAsync(messageId.Ulong())).DeleteOwnReactionAsync(((DiscordEmoji) emoji).Entity);
 
 	private Action<DiscordMessageBuilder> GetDiscordMessageBuilder(MessageBuilder messageBuilder, EntityId? responseTo) {
 		return dmb => {
