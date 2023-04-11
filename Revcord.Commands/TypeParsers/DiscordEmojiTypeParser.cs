@@ -1,14 +1,15 @@
 using System.Text.RegularExpressions;
 using Qmmands;
 using Revcord.Discord;
+using Revcord.Entities;
 using DiscordGuild = DSharpPlus.Entities.DiscordGuild;
 
 namespace Revcord.Commands;
 
-public class DiscordEmojiTypeParser : RevcordTypeParser<DiscordEmoji> {
+public class DiscordEmojiTypeParser : RevcordTypeParser<IEmoji> {
 	public static readonly Regex Regex = new Regex(@"^<a?:\w+:(?<Id>[0-9]+)>$");
 		
-	public override ValueTask<TypeParserResult<DiscordEmoji>> ParseAsync(Parameter parameter, string value, RevcordCommandContext context) {
+	public override ValueTask<TypeParserResult<IEmoji>> ParseAsync(Parameter parameter, string value, RevcordCommandContext context) {
 		foreach (DiscordGuild guild in ((DiscordChatClient) context.Client).DSharp.Guilds.Values) {
 			Console.WriteLine(guild.Emojis.Count);
 		}
@@ -20,17 +21,17 @@ public class DiscordEmojiTypeParser : RevcordTypeParser<DiscordEmoji> {
 			try {
 				result = DSharpPlus.Entities.DiscordEmoji.FromGuildEmote(((DiscordChatClient) context.Client).DSharp, id);
 			} catch (KeyNotFoundException) {
-				return TypeParserResult<DiscordEmoji>.Failed("Unknown emote");
+				return TypeParserResult<IEmoji>.Failed("Unknown emote");
 			}
 		} else {
 			try {
 				result = DSharpPlus.Entities.DiscordEmoji.FromUnicode(value);
 			} catch (ArgumentException) {
-				return TypeParserResult<DiscordEmoji>.Failed("Not a emote or emoji");
+				return TypeParserResult<IEmoji>.Failed("Not a emote or emoji");
 			}
 		}
 		
 		
-		return TypeParserResult<DiscordEmoji>.Successful(new DiscordEmoji(context.Client, result));
+		return TypeParserResult<IEmoji>.Successful(new DiscordEmoji(context.Client, result));
 	}
 }

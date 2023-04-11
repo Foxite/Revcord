@@ -1,13 +1,17 @@
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Qmmands;
+using Revcord.Discord;
 using Revcord.Entities;
+using Revcord.Revolt;
 
 namespace Revcord.Commands;
 
 public static class RevcordCommands {
-	public static void AddRevcordCommands(this IServiceCollection isc, Action<CommandService>? configureCommandService = null) {
+	public static IServiceCollection AddRevcordCommands(this IServiceCollection isc, Action<CommandService>? configureCommandService = null) {
+		isc.TryAddTransient<ICommandSupport<RevoltChatClient>, RevoltCommandSupport>();
+		isc.TryAddTransient<ICommandSupport<DiscordChatClient>, DiscordCommandSupport>();
+		
 		isc.TryAddSingleton(isp => new CommandServiceConfiguration() {
 			DefaultRunMode = RunMode.Sequential,
 		});
@@ -16,24 +20,21 @@ public static class RevcordCommands {
 			var ret = new CommandService(isp.GetRequiredService<CommandServiceConfiguration>());
 
 			var userParser = new ChatServiceObjectTypeParser<IUser>();
-			var channelParser = new ChatServiceObjectTypeParser<IChannel>();
-			var emojiParser = new ChatServiceObjectTypeParser<IEmoji>();
 			ret.AddTypeParser(userParser);
-			ret.AddTypeParser(channelParser);
-			ret.AddTypeParser(emojiParser);
+			ret.AddTypeParser(new ChatServiceObjectTypeParser<IChannel>());
+			ret.AddTypeParser(new ChatServiceObjectTypeParser<IEmoji>());
 			ret.AddTypeParser(new GuildMemberTypeParser(userParser));
 			//ret.AddTypeParser(new ChatServiceObjectTypeParser<IMessage>());
 			//ret.AddTypeParser(new ChatServiceObjectTypeParser<IGuild>());
 			
 			foreach (ChatClient client in isp.GetRequiredService<IEnumerable<ChatClient>>()) {
-				if (client is Discord.DiscordChatClient) {
-					userParser   .Add(client.GetType(), new RegexTypeParser<IUser>(new Regex(@"<@(?<Id>[0-9]+)>"), (context, match) => context.Client.GetUserAsync(new EntityId(ulong.Parse(match.Groups["Id"].Value))), "That is not a valid user mention."));
-					channelParser.Add(client.GetType(), new RegexTypeParser<IChannel>(new Regex(@"<#(?<Id>[0-9]+)>"), (context, match) => context.Client.GetChannelAsync(new EntityId(ulong.Parse(match.Groups["Id"].Value))), "That is not a valid channel mention."));
-					emojiParser  .Add(client.GetType(), new DiscordEmojiTypeParser());
-				} else if (client is Revolt.RevoltChatClient) {
-					userParser   .Add(client.GetType(), new RegexTypeParser<IUser>(new Regex(@"<@(?<Id>[0-9A-Z]+)>"), (context, match) => context.Client.GetUserAsync(new EntityId(match.Groups["Id"].Value)), "That is not a valid user mention."));
-					channelParser.Add(client.GetType(), new RegexTypeParser<IChannel>(new Regex(@"<#(?<Id>[0-9A-Z]+)>"), (context, match) => context.Client.GetChannelAsync(new EntityId(match.Groups["Id"].Value)), "That is not a valid channel mention."));
-					emojiParser  .Add(client.GetType(), new RevoltEmojiTypeParser());
+				var commandSupport = (ICommandSupport?) isp.GetService(typeof(ICommandSupport<>).MakeGenericType(client.GetType()));
+
+				if (commandSupport != null) {
+					commandSupport.Install(ret, client, isp);
+				} else {
+					// TODO logger
+					Console.WriteLine($"No command support available for {client.GetType().Name}");
 				}
 			}
 
@@ -41,5 +42,7 @@ public static class RevcordCommands {
 
 			return ret;
 		});
+		
+		return isc;
 	}
 }
