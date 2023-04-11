@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Revcord.Entities;
+﻿using Revcord.Entities;
 
 namespace Revcord;
 
@@ -30,12 +29,12 @@ public abstract class ChatClient {
 
 	protected Task OnMessageCreated(IMessage message) => HandleHandlerError(MessageCreated, "MessageCreated", new MessageCreatedArgs(this, message));
 	protected Task OnMessageUpdated(IMessage after) => HandleHandlerError(MessageUpdated, "MessageUpdated", new MessageUpdatedArgs(this, after));
-	protected Task OnMessageDeleted(EntityId id) => HandleHandlerError(MessageDeleted, "MessageDeleted", new MessageDeletedArgs(this, id));
+	protected Task OnMessageDeleted(IChannel channel, EntityId id) => HandleHandlerError(MessageDeleted, "MessageDeleted", new MessageDeletedArgs(this, channel, id));
 	
-	protected Task OnReactionAdded(IMessage message, IEmoji emoji) => HandleHandlerError(ReactionAdded, "ReactionAdded", new ReactionModifiedArgs(this, message, emoji, true));
-	protected Task OnReactionRemoved(IMessage message, IEmoji emoji) => HandleHandlerError(ReactionRemoved, "ReactionRemoved", new ReactionModifiedArgs(this, message, emoji, false));
+	protected Task OnReactionAdded(IMessage message, IEmoji emoji, IGuildMember member) => HandleHandlerError(ReactionAdded, "ReactionAdded", new ReactionModifiedArgs(this, message, emoji, member, true));
+	protected Task OnReactionRemoved(IMessage message, IEmoji emoji, IGuildMember member) => HandleHandlerError(ReactionRemoved, "ReactionRemoved", new ReactionModifiedArgs(this, message, emoji, member, false));
 	
-	protected Task OnClientError(Exception exception) => ClientError?.Invoke(new ClientErrorArgs(this, new ChatClientException(this, "An exception was thrown by the underlying chat client", exception))) ?? Task.CompletedTask;
+	protected Task OnClientError(Exception exception) => HandleHandlerError(ClientError, "ClientError", new ClientErrorArgs(this, new ChatClientException(this, "An exception was thrown by the underlying chat client", exception)));
 
 	public abstract Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId);
 	public abstract Task<IChannel> GetChannelAsync(EntityId id);

@@ -19,12 +19,12 @@ public class RevoltChatClient : ChatClient {
 
 		Revolt.OnMessageRecieved += message => OnMessageCreated(new RevoltMessage(this, message));
 		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(new EntityId(channel), new EntityId(messageId)));
-		Revolt.OnMessageDeleted += (channel, id) => OnMessageDeleted(new EntityId(id)); // parameter names inferred
-
-		Revolt.OnReactionAdded += (emoji, channel, member) => OnReactionAdded(new RevoltMessage(this, null), new RevoltEmoji(this, emoji));
-		Revolt.OnReactionRemoved += (emoji, channel, member) => OnReactionRemoved(new RevoltMessage(this, null), new RevoltEmoji(this, emoji));
-		//Revolt.OnReactionAdded += (emoji, channel, member, message) => OnReactionAdded(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
-		//Revolt.OnReactionRemoved += (emoji, channel, member, message) => OnReactionRemoved(new RevoltMessage(this, message), new RevoltEmoji(this, emoji));
+		Revolt.OnMessageDeleted += (channel, id) => OnMessageDeleted(new RevoltChannel(this, channel), new EntityId(id)); // parameter names inferred
+		
+		Revolt.OnReactionAdded += (emoji, channel, member) => OnReactionAdded(new RevoltMessage(this, null!), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, member, channel.Server));
+		Revolt.OnReactionRemoved += (emoji, channel, member) => OnReactionRemoved(new RevoltMessage(this, null!), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, member, channel.Server));
+		//Revolt.OnReactionAdded += (emoji, channel, member, message) => OnReactionAdded(new RevoltMessage(this, message), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, member, channel.Server));
+		//Revolt.OnReactionRemoved += (emoji, channel, member, message) => OnReactionRemoved(new RevoltMessage(this, message), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, member, channel.Server)
 
 		Revolt.OnWebSocketError += error => OnClientError(new RevoltException(error.Messaage, (int) error.Type));
 	}

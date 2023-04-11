@@ -25,7 +25,7 @@ public class DemoModule : ModuleBase<RevcordCommandContext> {
 
 	[Command("emoji")]
 	public CommandResult EmojiMention(IEmoji emoji) {
-		return new TextResult(emoji.Name + "!");
+		return new TextResult($"{emoji.ToString()}! {emoji.Id}! {emoji.Name}!");
 	}
 }
 

@@ -7,6 +7,8 @@ using Qmmands;
 using Revcord;
 using Revcord.Commands;
 using Revcord.Entities;
+using RevoltSharp;
+using EmbedBuilder = Revcord.EmbedBuilder;
 
 var isc = new ServiceCollection();
 string whichEnv = Environment.GetEnvironmentVariable("WHICH")!;
@@ -17,7 +19,11 @@ foreach (var which in whichEnv.Split(";")) {
 			Token = Environment.GetEnvironmentVariable("DISCORD_TOKEN")!,
 			Intents = DSharpPlus.DiscordIntents.GuildMessages | DSharpPlus.DiscordIntents.MessageContents | DSharpPlus.DiscordIntents.GuildMessageReactions | DSharpPlus.DiscordIntents.Guilds | DiscordIntents.GuildMembers,
 		}),
-		"revolt" => new Revcord.Revolt.RevoltChatClient(Environment.GetEnvironmentVariable("REVOLT_TOKEN")!),
+		"revolt" => new Revcord.Revolt.RevoltChatClient(Environment.GetEnvironmentVariable("REVOLT_TOKEN")!, new ClientConfig() {
+			Debug = {
+				LogWebSocketFull = false
+			}
+		}),
 	};
 	
 	isc.TryAddEnumerable(ServiceDescriptor.Singleton(client));
@@ -94,13 +100,25 @@ async Task HandleMessage(MessageCreatedArgs args) {
 }
 
 async Task HandleReactionModified(ReactionModifiedArgs args) {
+	if (args.Member.User.IsSelf) {
+		return;
+	}
+	
+	Console.WriteLine(args.Emoji.Name);
+	Console.WriteLine(args.Emoji.Id);
+	Console.WriteLine(args.Emoji.ToString());
 	if (args.Added) {
+		await args.Message.SendReplyAsync(args.Emoji.ToString());
 		await args.Message.AddReactionAsync(args.Emoji);
 	} else {
 		await args.Message.RemoveReactionAsync(args.Emoji);
 	}
 }
 
+Task HandleHandlerError(HandlerErrorArgs handlerErrorArgs) {
+	Console.WriteLine($"Error in {handlerErrorArgs.Sender.GetType().Name} {handlerErrorArgs.EventName}: {handlerErrorArgs.Exception.ToStringDemystified()}");
+	return Task.CompletedTask;
+}
 
 foreach (var client in services.GetRequiredService<IEnumerable<ChatClient>>()) {
 	await client.StartAsync();
@@ -109,6 +127,8 @@ foreach (var client in services.GetRequiredService<IEnumerable<ChatClient>>()) {
 	client.MessageCreated += HandleCommandMessage;
 	client.ReactionAdded += HandleReactionModified;
 	client.ReactionRemoved += HandleReactionModified;
+
+	client.EventHandlerError += HandleHandlerError;
 }
 
 Console.WriteLine("Hello, World!");

@@ -29,6 +29,7 @@ public record MessageUpdatedArgs(
 
 public record MessageDeletedArgs(
 	ChatClient Sender,
+	IChannel Channel,
 	EntityId MessageId
 ) : ChatClientEventArgs;
 
@@ -36,6 +37,7 @@ public record ReactionModifiedArgs(
 	ChatClient Client,
 	IMessage Message,
 	IEmoji Emoji,
+	IGuildMember Member,
 	bool Added
 ) : ChatClientEventArgs;
 

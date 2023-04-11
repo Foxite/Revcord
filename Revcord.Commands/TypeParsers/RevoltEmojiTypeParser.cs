@@ -15,9 +15,14 @@ public class RevoltEmojiTypeParser : RevcordTypeParser<RevoltEmoji> {
 		var revolt = (RevoltChatClient) context.Client;
 		// TODO non customized emoji
 		// Cast to nullable because the library doesn't have proper nullable reference types (TODO: pr to fix)
-		var result = (Emoji?) await revolt.Revolt.Rest.GetEmojiAsync(id);
-		if (result != null) {
-			return TypeParserResult<RevoltEmoji>.Successful(new RevoltEmoji(revolt, result));
+
+		if (RevoltEmoji.EmojiNamesToUnicode.TryGetValue(id, out string? unicode)) {
+			return new TypeParserResult<RevoltEmoji>(new RevoltEmoji(revolt, unicode));
+		}
+		
+		var guildEmote = (Emoji?) await revolt.Revolt.Rest.GetEmojiAsync(id);
+		if (guildEmote != null) {
+			return TypeParserResult<RevoltEmoji>.Successful(new RevoltEmoji(revolt, guildEmote));
 		} else {
 			return TypeParserResult<RevoltEmoji>.Failed("Unknown emote");
 		}
