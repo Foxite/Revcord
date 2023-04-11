@@ -27,7 +27,7 @@ public static class RevcordCommands {
 			//ret.AddTypeParser(new ChatServiceObjectTypeParser<IMessage>());
 			//ret.AddTypeParser(new ChatServiceObjectTypeParser<IGuild>());
 			
-			foreach (ChatClient client in isp.GetRequiredService<IEnumerable<ChatClient>>()) {
+			foreach (ChatClient client in isp.GetRequiredService<ChatClientService>().Clients) {
 				var commandSupport = (ICommandSupport?) isp.GetService(typeof(ICommandSupport<>).MakeGenericType(client.GetType()));
 
 				if (commandSupport != null) {

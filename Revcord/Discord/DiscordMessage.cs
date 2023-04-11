@@ -10,7 +10,7 @@ public class DiscordMessage : IMessage {
 
 	public ChatClient Client { get; }
 	public EntityId Id => EntityId.Of(m_Entity.Id);
-	public EntityId? GuildId => m_Entity.Channel.GuildId.HasValue ? EntityId.Of(m_Entity.Channel.GuildId) : null;
+	public EntityId? GuildId => m_Entity.Channel.GuildId.HasValue ? EntityId.Of(m_Entity.Channel.GuildId.Value) : null;
 	public EntityId ChannelId => EntityId.Of(m_Entity.ChannelId);
 	public EntityId AuthorId => EntityId.Of(m_Entity.Author.Id);
 

@@ -26,10 +26,7 @@ public readonly record struct EntityId {
 public class EntityIdJsonConverter : JsonConverter<EntityId> {
 	private readonly ConcurrentDictionary<string, Type> m_TypeCache = new();
 
-	private static volatile int i = 0;
 	public override void WriteJson(JsonWriter writer, EntityId value, JsonSerializer serializer) {
-		Console.WriteLine(Interlocked.Increment(ref i));
-		Console.WriteLine(value);
 		serializer.Serialize(writer, new SerializedEntityId(value.UnderlyingId.GetType().FullName ?? throw new Exception("what"), JToken.FromObject(value.UnderlyingId)));
 	}
 
