@@ -7,9 +7,9 @@ public class DiscordMember : IGuildMember {
 	
 	public ChatClient Client { get; }
 	public IUser User => new DiscordUser(Client, m_Entity);
-	public EntityId UserId => new EntityId(m_Entity.Id);
+	public EntityId UserId => EntityId.Of(m_Entity.Id);
 	public IGuild Guild => new DiscordGuild(Client, m_Entity.Guild);
-	public EntityId GuildId => new EntityId(m_Entity.Guild.Id);
+	public EntityId GuildId => EntityId.Of(m_Entity.Guild.Id);
 	public string? Nickname => m_Entity.Nickname;
 	
 	public DiscordMember(ChatClient chatClient, DSharpPlus.Entities.DiscordMember entity) {

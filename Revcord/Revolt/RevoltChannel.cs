@@ -8,7 +8,7 @@ public class RevoltChannel : IChannel {
 
 	public RevoltChatClient Client { get; }
 	ChatClient IChatServiceObject.Client => Client;
-	public EntityId Id => new EntityId(m_Entity.Id);
+	public EntityId Id => EntityId.Of(m_Entity.Id);
 	public string Name => m_Entity switch {
 		GroupChannel groupChannel => groupChannel.Name,
 		TextChannel textChannel => textChannel.Name,

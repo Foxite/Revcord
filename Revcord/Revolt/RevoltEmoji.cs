@@ -15,12 +15,12 @@ public partial class RevoltEmoji : IEmoji {
 		Client = client;
 
 		if (entity.IsServerEmoji) {
-			Id = new EntityId(entity.Id);
+			Id = EntityId.Of(entity.Id);
 			IsAnimated = entity.IsAnimated;
 			Name = entity.Name;
 			IsCustomizedEmote = true;
 		} else {
-			Id = new EntityId(entity.Id);
+			Id = EntityId.Of(entity.Id);
 			IsAnimated = false;
 			Name = UnicodeToEmojiNames[entity.Id];
 			IsCustomizedEmote = false;
@@ -30,7 +30,7 @@ public partial class RevoltEmoji : IEmoji {
 	public RevoltEmoji(RevoltChatClient client, string unicode) {
 		Client = client;
 
-		Id = new EntityId(unicode);
+		Id = EntityId.Of(unicode);
 		IsAnimated = false;
 		Name = UnicodeToEmojiNames[unicode];
 		IsCustomizedEmote = false;

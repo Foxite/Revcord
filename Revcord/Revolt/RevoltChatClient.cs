@@ -18,11 +18,11 @@ public class RevoltChatClient : ChatClient {
 		AutumnUrl = autumnUrl;
 
 		Revolt.OnMessageRecieved += message => OnMessageCreated(new RevoltMessage(this, message));
-		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(new EntityId(channel), new EntityId(messageId)));
-		Revolt.OnMessageDeleted += (channel, id) => OnMessageDeleted(new RevoltChannel(this, channel), new EntityId(id)); // parameter names inferred
+		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(EntityId.Of(channel), EntityId.Of(messageId)));
+		Revolt.OnMessageDeleted += (channel, id) => OnMessageDeleted(new RevoltChannel(this, channel), EntityId.Of(id)); // parameter names inferred
 
-		Revolt.OnReactionAdded += (emoji, channel, member, message) => OnReactionAdded(new RevoltMessage(this, message), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, member, channel.Server));
-		Revolt.OnReactionRemoved += (emoji, channel, member, message) => OnReactionRemoved(new RevoltMessage(this, message), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, member, channel.Server));
+		Revolt.OnReactionAdded += async (emoji, channel, member, message) => await OnReactionAdded(new RevoltMessage(this, await message.DownloadAsync()), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, await member.DownloadAsync(), channel.Server));
+		Revolt.OnReactionRemoved += async (emoji, channel, member, message) => await OnReactionRemoved(new RevoltMessage(this, await message.DownloadAsync()), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, await member.DownloadAsync(), channel.Server));
 
 		Revolt.OnWebSocketError += error => OnClientError(new RevoltException(error.Messaage, (int) error.Type));
 	}

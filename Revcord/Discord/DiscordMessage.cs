@@ -9,10 +9,10 @@ public class DiscordMessage : IMessage {
 	private readonly DSharpMessage m_Entity;
 
 	public ChatClient Client { get; }
-	public EntityId Id => new EntityId(m_Entity.Id);
-	public EntityId? GuildId => m_Entity.Channel.GuildId.HasValue ? new EntityId(m_Entity.Channel.GuildId) : null;
-	public EntityId ChannelId => new EntityId(m_Entity.ChannelId);
-	public EntityId AuthorId => new EntityId(m_Entity.Author.Id);
+	public EntityId Id => EntityId.Of(m_Entity.Id);
+	public EntityId? GuildId => m_Entity.Channel.GuildId.HasValue ? EntityId.Of(m_Entity.Channel.GuildId) : null;
+	public EntityId ChannelId => EntityId.Of(m_Entity.ChannelId);
+	public EntityId AuthorId => EntityId.Of(m_Entity.Author.Id);
 
 	public IGuild? Guild => m_Entity.Channel.Guild != null ? new DiscordGuild(Client, m_Entity.Channel.Guild) : null;
 	public IChannel Channel => new DiscordChannel(Client, m_Entity.Channel);

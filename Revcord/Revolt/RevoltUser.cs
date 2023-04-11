@@ -8,7 +8,7 @@ public class RevoltUser : IUser {
 
 	public RevoltChatClient Client { get; }
 	ChatClient IChatServiceObject.Client => Client;
-	public EntityId Id => new EntityId(m_Entity.Id);
+	public EntityId Id => EntityId.Of(m_Entity.Id);
 	public bool IsSelf => m_Entity.Client.CurrentUser.Id == m_Entity.Id;
 	public string DisplayName => m_Entity.Username;
 	public string Username => m_Entity.Username;

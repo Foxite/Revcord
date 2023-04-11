@@ -38,13 +38,13 @@ public abstract class CommandSupport<T> : ICommandSupport<T> where T : ChatClien
 }
 
 public class RevoltCommandSupport : CommandSupport<RevoltChatClient> {
-	protected override RevcordTypeParser<IUser>    GetUserParser()    => new RegexTypeParser<IUser>(new Regex(@"<@(?<Id>[0-9A-Z]+)>"), (context, match) => context.Client.GetUserAsync(new EntityId(match.Groups["Id"].Value)), "That is not a valid user mention.");
-	protected override RevcordTypeParser<IChannel> GetChannelParser() => new RegexTypeParser<IChannel>(new Regex(@"<#(?<Id>[0-9A-Z]+)>"), (context, match) => context.Client.GetChannelAsync(new EntityId(match.Groups["Id"].Value)), "That is not a valid channel mention.");
+	protected override RevcordTypeParser<IUser>    GetUserParser()    => new RegexTypeParser<IUser>(new Regex(@"<@(?<Id>[0-9A-Z]+)>"), (context, match) => context.Client.GetUserAsync(EntityId.Of(match.Groups["Id"].Value)), "That is not a valid user mention.");
+	protected override RevcordTypeParser<IChannel> GetChannelParser() => new RegexTypeParser<IChannel>(new Regex(@"<#(?<Id>[0-9A-Z]+)>"), (context, match) => context.Client.GetChannelAsync(EntityId.Of(match.Groups["Id"].Value)), "That is not a valid channel mention.");
 	protected override RevcordTypeParser<IEmoji>   GetEmojiParser()   => new RevoltEmojiTypeParser();
 }
 
 public class DiscordCommandSupport : CommandSupport<DiscordChatClient> {
-	protected override RevcordTypeParser<IUser>    GetUserParser()    => new RegexTypeParser<IUser>(new Regex(@"<@(?<Id>[0-9]+)>"), (context, match) => context.Client.GetUserAsync(new EntityId(ulong.Parse(match.Groups["Id"].Value))), "That is not a valid user mention.");
-	protected override RevcordTypeParser<IChannel> GetChannelParser() => new RegexTypeParser<IChannel>(new Regex(@"<#(?<Id>[0-9]+)>"), (context, match) => context.Client.GetChannelAsync(new EntityId(ulong.Parse(match.Groups["Id"].Value))), "That is not a valid channel mention.");
+	protected override RevcordTypeParser<IUser>    GetUserParser()    => new RegexTypeParser<IUser>(new Regex(@"<@(?<Id>[0-9]+)>"), (context, match) => context.Client.GetUserAsync(EntityId.Of(ulong.Parse(match.Groups["Id"].Value))), "That is not a valid user mention.");
+	protected override RevcordTypeParser<IChannel> GetChannelParser() => new RegexTypeParser<IChannel>(new Regex(@"<#(?<Id>[0-9]+)>"), (context, match) => context.Client.GetChannelAsync(EntityId.Of(ulong.Parse(match.Groups["Id"].Value))), "That is not a valid channel mention.");
 	protected override RevcordTypeParser<IEmoji>   GetEmojiParser()   => new DiscordEmojiTypeParser();
 }

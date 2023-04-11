@@ -5,7 +5,7 @@ namespace Revcord.Discord;
 public class DiscordEmoji : IEmoji {
 	public DSharpPlus.Entities.DiscordEmoji Entity { get; }
 	public ChatClient Client { get; }
-	public EntityId Id => new EntityId(Entity.Id);
+	public EntityId Id => EntityId.Of(Entity.Id);
 	public bool IsAnimated => Entity.IsAnimated;
 	public string Name => Entity.Name;
 	public bool IsCustomizedEmote => Entity.Id == 0;
