@@ -8,7 +8,8 @@ public class DiscordChannel : IChannel {
 	public ChatClient Client { get; }
 	public EntityId Id => EntityId.Of(m_Entity.Id);
 	public string Name => m_Entity.Name;
-	
+	public string MentionString => m_Entity.Mention;
+
 	public DiscordChannel(ChatClient chatClient, DSharpPlus.Entities.DiscordChannel entity) {
 		m_Entity = entity;
 		Client = chatClient;

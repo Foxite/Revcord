@@ -13,17 +13,10 @@ public class EntityIdConverter : ValueConverter<EntityId, string> {
 	) { }
 
 	private static string SerializeObject(EntityId entityId) {
-		var ret = JsonConvert.SerializeObject(entityId);
-
-		Console.WriteLine("Serialize");
-		Console.WriteLine(ret);
-		
-		return ret;
+		return JsonConvert.SerializeObject(entityId);
 	}
 
 	private static EntityId DeserializeObject(string str) {
-		Console.WriteLine("Deserialize");
-		Console.WriteLine(str);
 		return JsonConvert.DeserializeObject<EntityId>(str);
 	}
 }

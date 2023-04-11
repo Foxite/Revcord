@@ -9,6 +9,7 @@ public class RevoltChannel : IChannel {
 	public RevoltChatClient Client { get; }
 	ChatClient IChatServiceObject.Client => Client;
 	public EntityId Id => EntityId.Of(m_Entity.Id);
+	public string MentionString => $"<#{m_Entity.Id}>";
 	public string Name => m_Entity switch {
 		GroupChannel groupChannel => groupChannel.Name,
 		TextChannel textChannel => textChannel.Name,
@@ -18,7 +19,7 @@ public class RevoltChannel : IChannel {
 		//UnknownChannel unknownChannel => ,
 		_ => throw new ArgumentOutOfRangeException(nameof(m_Entity))
 	};
-	
+
 	public RevoltChannel(RevoltChatClient client, Channel entity) {
 		Client = client;
 		m_Entity = entity;
