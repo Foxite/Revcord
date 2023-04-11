@@ -3,32 +3,49 @@ using RevoltSharp;
 
 namespace Revcord.Revolt;
 
-public class RevoltEmoji : IEmoji {
-	private readonly Emoji m_Entity;
-
+public partial class RevoltEmoji : IEmoji {
 	public RevoltChatClient Client { get; }
 	ChatClient IChatServiceObject.Client => Client;
-	public EntityId Id => new EntityId(m_Entity.Id);
-	public bool IsAnimated => m_Entity.IsAnimated;
-	public string Name => m_Entity.Name; // TODO: test req about unicode emojis
-	public bool IsCustomizedEmote => m_Entity.IsServerEmoji;
+	public EntityId Id { get; }
+	public bool IsAnimated { get; }
+	public string Name { get; }
+	public bool IsCustomizedEmote { get; }
 	
 	public RevoltEmoji(RevoltChatClient client, Emoji entity) {
 		Client = client;
-		m_Entity = entity;
+
+		if (entity.IsServerEmoji) {
+			Id = new EntityId(entity.Id);
+			IsAnimated = entity.IsAnimated;
+			Name = entity.Name;
+			IsCustomizedEmote = true;
+		} else {
+			Id = new EntityId(entity.Id);
+			IsAnimated = false;
+			Name = UnicodeToEmojiNames[entity.Id];
+			IsCustomizedEmote = false;
+		}
+	}
+
+	public RevoltEmoji(RevoltChatClient client, string unicode) {
+		Client = client;
+
+		Id = new EntityId(unicode);
+		IsAnimated = false;
+		Name = UnicodeToEmojiNames[unicode];
+		IsCustomizedEmote = false;
 	}
 
 	public bool Equals(IEmoji? other) {
 		return other is RevoltEmoji otherRe
-		       && m_Entity.IsServerEmoji == otherRe.m_Entity.IsServerEmoji
+		       && IsCustomizedEmote == otherRe.IsCustomizedEmote
 		       // TODO: test req about unicode emojis
 		       // TODO: test req about variant names
-		       && m_Entity.Name == otherRe.m_Entity.Name
-		       && m_Entity.Id == otherRe.m_Entity.Id;
+		       && Name == otherRe.Name
+		       && Id == otherRe.Id;
 	}
 
 	public override string ToString() {
-		// TODO test unicode emojis
-		return $":{m_Entity.Id}:";
+		return $":{(IsCustomizedEmote ? Id.String() : Name)}:";
 	}
 }
