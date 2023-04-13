@@ -2,7 +2,9 @@ using Revcord.Entities;
 
 namespace Revcord;
 
-public abstract record ChatClientEventArgs {
+public abstract record AsyncEventArgs;
+
+public abstract record ChatClientEventArgs : AsyncEventArgs {
 	public virtual string EventName {
 		get {
 			string typeName = GetType().Name;
@@ -29,6 +31,7 @@ public record MessageUpdatedArgs(
 
 public record MessageDeletedArgs(
 	ChatClient Sender,
+	IChannel Channel,
 	EntityId MessageId
 ) : ChatClientEventArgs;
 
@@ -36,6 +39,7 @@ public record ReactionModifiedArgs(
 	ChatClient Client,
 	IMessage Message,
 	IEmoji Emoji,
+	IGuildMember Member,
 	bool Added
 ) : ChatClientEventArgs;
 
@@ -43,3 +47,9 @@ public record ClientErrorArgs(
 	ChatClient Sender,
 	Exception Exception
 ) : ChatClientEventArgs;
+
+public record HandlerErrorArgs(
+	ChatClient Sender,
+	string EventName,
+	Exception Exception
+) : AsyncEventArgs;

@@ -8,14 +8,14 @@ public class RevoltMessage : IMessage {
 
 	public RevoltChatClient Client { get; }
 	ChatClient IChatServiceObject.Client => Client;
-	public EntityId Id => new EntityId(m_Entity.Id);
-	public EntityId? GuildId => m_Entity.Channel is ServerChannel sc ? new EntityId(sc.ServerId) : null;
-	public EntityId ChannelId => new EntityId(m_Entity.ChannelId);
-	public EntityId AuthorId => new EntityId(m_Entity.AuthorId);
+	public EntityId Id => EntityId.Of(m_Entity.Id);
+	public EntityId? GuildId => m_Entity.Channel is ServerChannel sc ? EntityId.Of(sc.ServerId) : null;
+	public EntityId ChannelId => EntityId.Of(m_Entity.ChannelId);
+	public EntityId AuthorId => EntityId.Of(m_Entity.AuthorId);
 	public IGuild? Guild => m_Entity.Channel is ServerChannel sc ? new RevoltGuild(Client, sc.Server) : null;
 	public IChannel Channel => new RevoltChannel(Client, m_Entity.Channel);
 	public IUser Author => new RevoltUser(Client, m_Entity.Author);
-	public IGuildMember? AuthorMember => m_Entity.Channel is ServerChannel sc ? new RevoltGuildMember(Client, sc.Server.GetCachedMember(m_Entity.AuthorId)) : null;
+	public IGuildMember? AuthorMember => m_Entity.Channel is ServerChannel sc ? new RevoltGuildMember(Client, sc.Server.GetCachedMember(m_Entity.AuthorId), sc.Server) : null;
 	public string? Content => (m_Entity as UserMessage)?.Content;
 	public bool AuthorIsSelf => m_Entity.Author.Client.CurrentUser.Id == m_Entity.AuthorId;
 	public DateTimeOffset CreationTimestamp => Ulid.Parse(m_Entity.Id).Time;

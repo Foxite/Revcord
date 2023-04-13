@@ -7,7 +7,8 @@ public interface IGuildMember : IChatServiceObject {
 	EntityId GuildId { get; }
 	
 	string? Nickname { get; }
-	
+	string DisplayName => Nickname ?? User.DisplayName;
+
 	// todo: roles
 	// todo: avatar
 }
