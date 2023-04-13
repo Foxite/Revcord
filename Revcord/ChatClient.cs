@@ -36,7 +36,7 @@ public abstract class ChatClient {
 	protected Task OnReactionAdded(IMessage message, IEmoji emoji, IGuildMember member) => HandleHandlerError(ReactionAdded, "ReactionAdded", new ReactionModifiedArgs(this, message, emoji, member, true));
 	protected Task OnReactionRemoved(IMessage message, IEmoji emoji, IGuildMember member) => HandleHandlerError(ReactionRemoved, "ReactionRemoved", new ReactionModifiedArgs(this, message, emoji, member, false));
 	
-	protected Task OnClientError(Exception exception) => HandleHandlerError(ClientError, "ClientError", new ClientErrorArgs(this, new ChatClientException(this, "An exception was thrown by the underlying chat client", exception)));
+	protected Task OnClientError(Exception exception) => HandleHandlerError(ClientError, "ClientError", new ClientErrorArgs(this, exception));
 
 	public abstract Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId);
 	public abstract Task<IChannel> GetChannelAsync(EntityId id);
