@@ -13,6 +13,13 @@ public class ChatClientService {
 
 	public IReadOnlyCollection<ChatClient> Clients => m_Clients;
 
+	public ChatClientService() {}
+	public ChatClientService(IEnumerable<ChatClient> clients) {
+		foreach (var client in clients) {
+			AddClient(client);
+		}
+	}
+
 	public void AddClient(ChatClient client) {
 		m_Clients.Add(client);
 		
