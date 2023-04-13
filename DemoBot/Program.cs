@@ -29,6 +29,8 @@ foreach (var which in whichEnv.Split(";")) {
 	isc.TryAddEnumerable(ServiceDescriptor.Singleton(client));
 }
 
+isc.AddSingleton<ChatClientService>();
+
 isc.AddRevcordCommands(commands => {
 	commands.AddModule<DemoModule>();
 });
@@ -38,6 +40,8 @@ isc.AddRevcordCommands(commands => {
 var services = isc.BuildServiceProvider();
 var commands = services.GetRequiredService<CommandService>();
 
+// TODO move a generic, customizable handler into Revcord.Commands
+// And switch to using result object from commands
 async Task HandleCommandMessage(MessageCreatedArgs args) {
 	if (args.Message.Content != null && args.Message.Content.StartsWith(args.Client.CurrentUser.MentionString)) {
 		string commandText = args.Message.Content[args.Client.CurrentUser.MentionString.Length..];
@@ -120,16 +124,15 @@ Task HandleHandlerError(HandlerErrorArgs handlerErrorArgs) {
 	return Task.CompletedTask;
 }
 
-foreach (var client in services.GetRequiredService<IEnumerable<ChatClient>>()) {
-	await client.StartAsync();
+var chatClientService = services.GetRequiredService<ChatClientService>();
+await chatClientService.StartAsync();
 
-	client.MessageCreated += HandleMessage;
-	client.MessageCreated += HandleCommandMessage;
-	client.ReactionAdded += HandleReactionModified;
-	client.ReactionRemoved += HandleReactionModified;
+chatClientService.MessageCreated += HandleMessage;
+chatClientService.MessageCreated += HandleCommandMessage;
+chatClientService.ReactionAdded += HandleReactionModified;
+chatClientService.ReactionRemoved += HandleReactionModified;
 
-	client.EventHandlerError += HandleHandlerError;
-}
+chatClientService.EventHandlerError += HandleHandlerError;
 
 Console.WriteLine("Hello, World!");
 
