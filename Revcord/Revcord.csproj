@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <RevoltSource>Development</RevoltSource>
+        <RevoltSource>Production</RevoltSource>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -20,7 +20,7 @@
     </ItemGroup>
     
     <ItemGroup Condition=" '$(RevoltSource)' == 'Production' ">
-      <PackageReference Include="RevoltSharp" Version="4.0.6" />
+      <PackageReference Include="RevoltSharp" Version="4.0.7" />
     </ItemGroup>
 
     <ItemGroup Condition=" '$(RevoltSource)' == 'Development' ">
