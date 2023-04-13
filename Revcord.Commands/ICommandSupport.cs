@@ -7,7 +7,9 @@ using Revcord.Revolt;
 namespace Revcord.Commands;
 
 /// <summary>
-/// Do not implement this interface, implement the generic version <see cref="ICommandSupport{T}"/> instead.
+/// Do not implement this interface, implement the generic version <see cref="ICommandSupport{T}"/> instead. You should preferably extend from the abstract class <see cref="CommandSupport{T}"/>.
+/// This interface exists to that this library can call Install without needing to know the generic parameters at compile time.
+/// The generic version exists so that this library can retrieve an object for a specific ChatClient type, which it knows at runtime.
 /// </summary>
 public interface ICommandSupport {
 	void Install(CommandService commands, ChatClient client, IServiceProvider isp);
