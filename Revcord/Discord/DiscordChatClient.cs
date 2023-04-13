@@ -24,8 +24,8 @@ public class DiscordChatClient : ChatClient {
 		DSharp.MessageCreated += (_, args) => OnMessageCreated(new DiscordMessage(this, args.Message));
 		DSharp.MessageUpdated += (_, args) => OnMessageUpdated(new DiscordMessage(this, args.Message));
 		DSharp.MessageDeleted += (_, args) => OnMessageDeleted(new DiscordChannel(this, args.Channel), EntityId.Of(args.Message.Id));
-		DSharp.MessageReactionAdded += (_, args) => OnReactionAdded(new DiscordMessage(this, args.Message), new DiscordEmoji(this, args.Emoji), new DiscordMember(this, (SharpMember) args.User));
-		DSharp.MessageReactionRemoved += (_, args) => OnReactionRemoved(new DiscordMessage(this, args.Message), new DiscordEmoji(this, args.Emoji), new DiscordMember(this, (SharpMember) args.User));
+		DSharp.MessageReactionAdded += async (_, args) => await OnReactionAdded(new DiscordMessage(this, await args.Channel.GetMessageAsync(args.Message.Id)), new DiscordEmoji(this, args.Emoji), new DiscordMember(this, (SharpMember) args.User));
+		DSharp.MessageReactionRemoved += async (_, args) => await OnReactionRemoved(new DiscordMessage(this, await args.Channel.GetMessageAsync(args.Message.Id)), new DiscordEmoji(this, args.Emoji), new DiscordMember(this, (SharpMember) args.User));
 		DSharp.ClientErrored += (_, args) => OnClientError(args.Exception);
 		DSharp.SocketErrored += (_, args) => OnClientError(args.Exception);
 	}
