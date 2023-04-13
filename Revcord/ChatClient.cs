@@ -2,6 +2,8 @@
 
 namespace Revcord;
 
+// TODO a mock implementation for unit testing
+// Also: NUnit support
 public abstract class ChatClient {
 	public event AsyncEventHandler<MessageCreatedArgs>? MessageCreated;
 	public event AsyncEventHandler<MessageUpdatedArgs>? MessageUpdated;

@@ -25,6 +25,8 @@ public class RevoltEmojiTypeParser : RevcordTypeParser<IEmoji> {
 		if (guildEmote != null) {
 			return TypeParserResult<IEmoji>.Successful(new RevoltEmoji(revolt, guildEmote));
 		} else {
+			// TODO customizable response strings (everywhere)
+			// TODO localizable response strings (everywhere)
 			return TypeParserResult<IEmoji>.Failed("Unknown emote");
 		}
 	}
