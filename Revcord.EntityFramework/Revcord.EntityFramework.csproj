@@ -6,6 +6,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <RestoreSources>https://nuget.repo.corsac.nl/v3/index.json;https://nuget.emzi0767.com/api/v3/index.json;https://api.nuget.org/v3/index.json</RestoreSources>
+    </PropertyGroup>
+
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="7.0.5" />
