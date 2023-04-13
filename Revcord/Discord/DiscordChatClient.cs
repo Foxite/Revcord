@@ -1,5 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
 using Revcord.Entities;
 using SharpGuild   = DSharpPlus.Entities.DiscordGuild;
@@ -30,12 +31,26 @@ public class DiscordChatClient : ChatClient {
 	}
 
 	public async override Task StartAsync() {
-		DSharp.Ready += (_, _) => {
+		Task OnReady(DiscordClient discordClient, ReadyEventArgs readyEventArgs) {
 			m_ReadyTcs.SetResult();
 			return Task.CompletedTask;
-		};
-		await DSharp.ConnectAsync();
-		await m_ReadyTcs.Task;
+		}
+		
+		Task OnError(DiscordClient discordClient, SocketErrorEventArgs socketErrorEventArgs) {
+			m_ReadyTcs.SetException(new ChatClientException(this, "DSharpPlus failed to connect.", socketErrorEventArgs.Exception));
+			return Task.CompletedTask;
+		}
+
+		DSharp.Ready += OnReady;
+		DSharp.SocketErrored += OnError;
+
+		try {
+			await DSharp.ConnectAsync();
+			await m_ReadyTcs.Task;
+		} finally {
+			DSharp.Ready -= OnReady;
+			DSharp.SocketErrored -= OnError;
+		}
 	}
 
 	// todo: almost all of these do multiple api call because dsharpplus has a stupid abstraction and doesn't expose its rest client. to fix this, replace dsharpplus with something else
