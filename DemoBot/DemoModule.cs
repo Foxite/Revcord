@@ -1,4 +1,5 @@
 using Qmmands;
+using Revcord;
 using Revcord.Commands;
 using Revcord.Entities;
 
@@ -26,6 +27,15 @@ public class DemoModule : ModuleBase<RevcordCommandContext> {
 	[Command("emoji")]
 	public CommandResult EmojiMention(IEmoji emoji) {
 		return new TextResult($"{emoji.ToString()}! {emoji.Id}! {emoji.Name}!");
+	}
+
+	[Command("countdown")]
+	public async Task Countdown() {
+		var message = await Context.RespondAsync("3");
+		await Task.Delay(TimeSpan.FromSeconds(1));
+		await message.UpdateAsync("2");
+		await Task.Delay(TimeSpan.FromSeconds(1));
+		await message.UpdateAsync("1");
 	}
 }
 
