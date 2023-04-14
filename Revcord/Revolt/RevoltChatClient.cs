@@ -18,7 +18,7 @@ public class RevoltChatClient : ChatClient {
 		AutumnUrl = autumnUrl;
 
 		Revolt.OnMessageRecieved += message => OnMessageCreated(new RevoltMessage(this, message));
-		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(EntityId.Of(channel), EntityId.Of(messageId)));
+		Revolt.OnMessageUpdated += async (channel, messageId, content) => await OnMessageUpdated(await GetMessageAsync(EntityId.Of(channel.Id), EntityId.Of(messageId)));
 		Revolt.OnMessageDeleted += (channel, id) => OnMessageDeleted(new RevoltChannel(this, channel), EntityId.Of(id)); // parameter names inferred
 
 		Revolt.OnReactionAdded += async (emoji, channel, member, message) => await OnReactionAdded(new RevoltMessage(this, await message.DownloadAsync()), new RevoltEmoji(this, emoji), new RevoltGuildMember(this, await member.DownloadAsync(), channel.Server));
@@ -43,7 +43,7 @@ public class RevoltChatClient : ChatClient {
 	public async override Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId) {
 		Message message;
 		try {
-			message = await Revolt.Rest.GetMessageAsync(channelId.ToString(), messageId.String());
+			message = await Revolt.Rest.GetMessageAsync(channelId.String(), messageId.String());
 		} catch (NullReferenceException) {
 			throw new EntityNotFoundException(this, null);
 		}
