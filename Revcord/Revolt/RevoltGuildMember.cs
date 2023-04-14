@@ -4,20 +4,21 @@ using RevoltSharp;
 namespace Revcord.Revolt;
 
 public class RevoltGuildMember : IGuildMember {
-	private readonly ServerMember m_Entity;
 	private readonly Server m_Server;
+	
+	public ServerMember Entity { get; }
 
 	public RevoltChatClient Client { get; }
 	ChatClient IChatServiceObject.Client => Client;
-	public IUser User => new RevoltUser(Client, m_Entity.User);
-	public EntityId UserId => EntityId.Of(m_Entity.Id);
+	public IUser User => new RevoltUser(Client, Entity.User);
+	public EntityId UserId => EntityId.Of(Entity.Id);
 	public IGuild Guild => new RevoltGuild(Client, m_Server);
 	public EntityId GuildId => EntityId.Of(m_Server.Id);
-	public string? Nickname => m_Entity.Nickname;
+	public string? Nickname => Entity.Nickname;
 	
 	public RevoltGuildMember(RevoltChatClient client, ServerMember entity, Server server) {
 		Client = client;
-		m_Entity = entity;
+		Entity = entity;
 		m_Server = server;
 	}
 }

@@ -3,14 +3,14 @@ using Revcord.Entities;
 namespace Revcord.Discord;
 
 public class DiscordReaction : IReaction {
-	private readonly DSharpPlus.Entities.DiscordReaction m_Entity;
-	
+	public DSharpPlus.Entities.DiscordReaction Entity { get; }
+
 	public ChatClient Client { get; }
-	public IEmoji Emoji => new DiscordEmoji(Client, m_Entity.Emoji);
-	public int Count => m_Entity.Count;
+	public IEmoji Emoji => new DiscordEmoji(Client, Entity.Emoji);
+	public int Count => Entity.Count;
 	
 	public DiscordReaction(ChatClient chatClient, DSharpPlus.Entities.DiscordReaction entity) {
-		m_Entity = entity;
+		Entity = entity;
 		Client = chatClient;
 	}
 }
