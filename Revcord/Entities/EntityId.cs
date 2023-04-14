@@ -16,6 +16,14 @@ public readonly record struct EntityId {
 		if (underlyingId is EntityId) {
 			throw new InvalidOperationException("Attempt to wrap an EntityId in an EntityId");
 		}
+
+		if (underlyingId is not string) {
+			if (underlyingId.GetType().IsByRef) {
+				throw new InvalidOperationException("Attempt to wrap reference type other than String in an EntityId");
+			} else if (!underlyingId.GetType().IsPrimitive) {
+				throw new InvalidOperationException("Attempt to wrap non-primitive value type in an EntityId");
+			}
+		}
 		
 		UnderlyingId = underlyingId;
 	}
