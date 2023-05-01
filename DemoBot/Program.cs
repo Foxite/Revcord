@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
-using DSharpPlus;
+using DemoBot;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Qmmands;
 using Revcord;
 using Revcord.Commands;
 using Revcord.Entities;
-using RevoltSharp;
 using EmbedBuilder = Revcord.EmbedBuilder;
 
 var isc = new ServiceCollection();
@@ -17,14 +16,16 @@ foreach (var which in whichEnv.Split(";")) {
 	ChatClient client = which switch {
 		"discord" => new Revcord.Discord.DiscordChatClient(new DSharpPlus.DiscordConfiguration() {
 			Token = Environment.GetEnvironmentVariable("DISCORD_TOKEN")!,
-			Intents = DSharpPlus.DiscordIntents.GuildMessages | DSharpPlus.DiscordIntents.MessageContents | DSharpPlus.DiscordIntents.GuildMessageReactions | DSharpPlus.DiscordIntents.Guilds | DiscordIntents.GuildMembers,
+			Intents = DSharpPlus.DiscordIntents.GuildMessages | DSharpPlus.DiscordIntents.MessageContents | DSharpPlus.DiscordIntents.GuildMessageReactions | DSharpPlus.DiscordIntents.Guilds | DSharpPlus.DiscordIntents.GuildMembers,
 		}),
-		"revolt" => new Revcord.Revolt.RevoltChatClient(Environment.GetEnvironmentVariable("REVOLT_TOKEN")!, new ClientConfig() {
+		"revolt" => new Revcord.Revolt.RevoltChatClient(Environment.GetEnvironmentVariable("REVOLT_TOKEN")!, new RevoltSharp.ClientConfig() {
 			Debug = {
 				LogWebSocketFull = false
 			}
 		}),
 	};
+	
+	client.AddRenderer(new TestObjectRenderer(client));
 	
 	isc.TryAddEnumerable(ServiceDescriptor.Singleton(client));
 }
@@ -43,32 +44,31 @@ var commands = services.GetRequiredService<CommandService>();
 // TODO move a generic, customizable handler into Revcord.Commands
 // And switch to using result object from commands
 async Task HandleCommandMessage(MessageCreatedArgs args) {
-	if (args.Message.Content != null && args.Message.Content.StartsWith(args.Client.CurrentUser.MentionString)) {
-		string commandText = args.Message.Content[args.Client.CurrentUser.MentionString.Length..];
-		var context = new RevcordCommandContext(args.Message, services);
-		IResult result = await commands.ExecuteAsync(commandText, context);
-		Console.WriteLine(result.GetType().Name);
-		Console.WriteLine(result);
-		
-		switch (result) {
-			case CommandExecutionFailedResult cefr:
-				Console.WriteLine($"Execution failed at {cefr.CommandExecutionStep}: {cefr.Exception.ToStringDemystified()}");
-				break;
-			case OverloadsFailedResult ofr:
-				Console.WriteLine(ofr.FailureReason);
-				foreach ((Command? command, FailedResult? failedResult) in ofr.FailedOverloads) {
-					Console.WriteLine($"{command.Name}: {failedResult?.FailureReason ?? "null"}");
-				}
-				break;
-			case TypeParseFailedResult tpfr:
-				break;
-		}
-		
-		string? resultString = result.ToString();
-		if (resultString != null) {
-			await context.RespondAsync(resultString);
-		}
+	if (args.Message.Content == null || !args.Message.Content.StartsWith(args.Client.CurrentUser.MentionString)) {
+		return;
 	}
+	
+	string commandText = args.Message.Content[args.Client.CurrentUser.MentionString.Length..];
+	var context = new RevcordCommandContext(args.Message, services);
+	IResult result = await commands.ExecuteAsync(commandText, context);
+	Console.WriteLine(result.GetType().Name);
+	Console.WriteLine(result);
+
+	switch (result) {
+		case CommandExecutionFailedResult cefr:
+			Console.WriteLine($"Execution failed at {cefr.CommandExecutionStep}: {cefr.Exception.ToStringDemystified()}");
+			break;
+		case OverloadsFailedResult ofr:
+			Console.WriteLine(ofr.FailureReason);
+			foreach ((Command? command, FailedResult? failedResult) in ofr.FailedOverloads) {
+				Console.WriteLine($"{command.Name}: {failedResult?.FailureReason ?? "null"}");
+			}
+			break;
+		case TypeParseFailedResult tpfr:
+			break;
+	}
+
+	await context.Message.SendReplyAsync(result is ObjectResult or ? or.Object : result.ToString()!);
 }
 
 async Task HandleMessage(MessageCreatedArgs args) {
@@ -78,28 +78,30 @@ async Task HandleMessage(MessageCreatedArgs args) {
 		return;
 	}
 
-	if (message.Content != null) {
-		Console.WriteLine(message.Content);
-		
-		string lowerContent = message.Content.ToLower();
-		if (lowerContent.StartsWith("ping")) {
-			await args.Client.SendMessageAsync(message.Channel, "Pong!");
-		} else if (lowerContent.StartsWith("reply")) {
-			await message.SendReplyAsync("Reply!");
-		} else if (lowerContent.StartsWith("mention")) {
-			await message.SendReplyAsync(message.Author.MentionString + " !");
-		} else if (lowerContent.StartsWith("delay")) {
-			await message.SendReplyAsync($"{(DateTimeOffset.UtcNow - message.CreationTimestamp).TotalMilliseconds} ms!");
-		} else if (lowerContent.StartsWith("embed")) {
-			await message.SendReplyAsync(new MessageBuilder().WithContent("Embed!")
-				.AddEmbed(new EmbedBuilder().WithTitle("This is an embed!")
-					.WithDescription("This is its description!")
-					.WithIconUrl(message.Author.AvatarUrl)
-					.WithColor(Color.Orange)
-					.WithImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Vulpes_vulpes_ssp_fulvus.jpg/1280px-Vulpes_vulpes_ssp_fulvus.jpg")
-					.WithUrl("https://foxite.me")
-					.AddField(new EmbedFieldBuilder("Field?!", "(TOP SECRET: doesnt work on revolt :/"))));
-		}
+	if (message.Content == null) {
+		return;
+	}
+	
+	Console.WriteLine(message.Content);
+
+	string lowerContent = message.Content.ToLower();
+	if (lowerContent.StartsWith("ping")) {
+		await args.Client.SendMessageAsync(message.Channel, "Pong!");
+	} else if (lowerContent.StartsWith("reply")) {
+		await message.SendReplyAsync("Reply!");
+	} else if (lowerContent.StartsWith("mention")) {
+		await message.SendReplyAsync(message.Author.MentionString + " !");
+	} else if (lowerContent.StartsWith("delay")) {
+		await message.SendReplyAsync($"{(DateTimeOffset.UtcNow - message.CreationTimestamp).TotalMilliseconds} ms!");
+	} else if (lowerContent.StartsWith("embed")) {
+		await message.SendReplyAsync(new MessageBuilder().WithContent("Embed!")
+			.AddEmbed(new EmbedBuilder().WithTitle("This is an embed!")
+				.WithDescription("This is its description!")
+				.WithIconUrl(message.Author.AvatarUrl)
+				.WithColor(Color.Orange)
+				.WithImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Vulpes_vulpes_ssp_fulvus.jpg/1280px-Vulpes_vulpes_ssp_fulvus.jpg")
+				.WithUrl("https://foxite.me")
+				.AddField(new EmbedFieldBuilder("Field?!", "(TOP SECRET: doesnt work on revolt :/"))));
 	}
 }
 
