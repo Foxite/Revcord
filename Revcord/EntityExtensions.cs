@@ -3,19 +3,11 @@ using Revcord.Entities;
 namespace Revcord;
 
 public static class EntityExtensions {
-	public static Task<IMessage> SendMessageAsync(this ChatClient client, IChannel channel, MessageBuilder messageBuilder, EntityId? responseTo = null) => client.SendMessageAsync(channel.Id, messageBuilder, responseTo);
-	public static Task<IMessage> SendMessageAsync(this ChatClient client, IChannel channel, string content, EntityId? responseTo = null) => client.SendMessageAsync(channel.Id, new MessageBuilder().WithContent(content), responseTo);
-	
-	public static Task<IMessage> UpdateMessageAsync(this ChatClient client, IMessage message, string content) => client.UpdateMessageAsync(message.ChannelId, message.Id, new MessageBuilder().WithContent(content));
-	
-	public static Task<IMessage> SendMessageAsync(this IChannel channel, MessageBuilder messageBuilder, EntityId? responseTo = null) => channel.Client.SendMessageAsync(channel, messageBuilder, responseTo);
-	public static Task<IMessage> SendMessageAsync(this IChannel channel, string content, EntityId? responseTo = null) => channel.Client.SendMessageAsync(channel.Id, new MessageBuilder().WithContent(content), responseTo);
-	
-	public static Task<IMessage> SendReplyAsync(this IMessage message, MessageBuilder messageBuilder) => SendMessageAsync(message.Channel, messageBuilder, message.Id);
-	public static Task<IMessage> SendReplyAsync(this IMessage message, string content) => SendMessageAsync(message.Channel, new MessageBuilder().WithContent(content), message.Id);
+	public static Task<IMessage> SendMessageAsync<T>(this ChatClient client, IChannel channel, T content, EntityId? responseTo = null) where T : notnull => client.SendMessageAsync(channel.Id, content, responseTo);
+	public static Task<IMessage> SendMessageAsync<T>(this IChannel channel, T content, EntityId? responseTo = null) where T : notnull => EntityExtensions.SendMessageAsync(channel.Client, channel, content, responseTo);
+	public static Task<IMessage> SendReplyAsync<T>(this IMessage message, T content) where T : notnull => EntityExtensions.SendMessageAsync(message.Client, message.Channel, content, message.Id);
 
-	public static Task<IMessage> UpdateAsync(this IMessage message, MessageBuilder messageBuilder) => message.Client.UpdateMessageAsync(message.ChannelId, message.Id, messageBuilder);
-	public static Task<IMessage> UpdateAsync(this IMessage message, string content) => message.Client.UpdateMessageAsync(message.ChannelId, message.Id, new MessageBuilder().WithContent(content));
+	public static Task<IMessage> UpdateAsync<T>(this IMessage message, T content) where T : notnull => message.Client.UpdateMessageAsync(message.ChannelId, message.Id, content);
 
 	public static Task AddReactionAsync(this IMessage message, IEmoji emoji) => message.Client.AddReactionAsync(message.ChannelId, message.Id, emoji);
 	public static Task RemoveReactionAsync(this IMessage message, IEmoji emoji) => message.Client.RemoveReactionAsync(message.ChannelId, message.Id, emoji);

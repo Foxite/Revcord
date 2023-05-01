@@ -1,13 +1,11 @@
-﻿using Revcord.Entities;
+﻿using Foxite.Text;
+using Foxite.Text.Parsers;
+using Revcord.Entities;
 
 namespace Revcord;
 
 // TODO a mock implementation for unit testing
 // Also: NUnit support
-
-// TODO: abstract formatter
-
-// TODO: a system to turn arbitrary objects into platform-specific message builders
 public abstract class ChatClient {
 	public event AsyncEventHandler<MessageCreatedArgs>? MessageCreated;
 	public event AsyncEventHandler<MessageUpdatedArgs>? MessageUpdated;
@@ -17,7 +15,11 @@ public abstract class ChatClient {
 	public event AsyncEventHandler<ClientErrorArgs>? ClientError;
 	public event AsyncEventHandler<HandlerErrorArgs>? EventHandlerError;
 	
+	protected Dictionary<Type, IMessageRenderer> Renderers { get; } = new();
+
 	public abstract IUser CurrentUser { get; }
+	public abstract ITextFormatter TextFormatter { get; }
+	public abstract Parser TextParser { get; }
 	
 	public abstract Task StartAsync();
 
@@ -42,17 +44,52 @@ public abstract class ChatClient {
 	
 	protected Task OnClientError(Exception exception) => HandleHandlerError(ClientError, "ClientError", new ClientErrorArgs(this, exception));
 
+	protected IMessageRenderer GetRenderer(object obj) {
+		return Renderers[obj.GetType()];
+	}
+
+	public void AddRenderer<TChatClient, TMessage>(MessageRenderer<TChatClient, TMessage> renderer) where TChatClient : ChatClient {
+		Renderers[typeof(TMessage)] = renderer;
+	}
+
 	public abstract Task<IMessage> GetMessageAsync(EntityId channelId, EntityId messageId);
 	public abstract Task<IChannel> GetChannelAsync(EntityId id);
 	public abstract Task<IGuild> GetGuildAsync(EntityId id);
 	public abstract Task<IUser> GetUserAsync(EntityId id);
 	public abstract Task<IGuildMember> GetGuildMemberAsync(EntityId guildId, EntityId userId);
 	// todo: get dm channel with user
-	
-	public abstract Task<IMessage> SendMessageAsync(EntityId channelId, MessageBuilder messageBuilder, EntityId? responseTo = null);
-	public abstract Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, MessageBuilder messageBuilder);
+
+	public virtual Task<IMessage> SendMessageAsync<T>(EntityId channelId, T content, EntityId? responseTo = null) where T : notnull => GetRenderer(content).SendMessageAsync(channelId, content, responseTo);
+	public virtual Task<IMessage> UpdateMessageAsync<T>(EntityId channelId, EntityId messageId, T content) where T : notnull => GetRenderer(content).UpdateMessageAsync(channelId, messageId, content);
 	public abstract Task DeleteMessageAsync(EntityId channelId, EntityId messageId);
 
 	public abstract Task AddReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji);
 	public abstract Task RemoveReactionAsync(EntityId channelId, EntityId messageId, IEmoji emoji);
+	
+	protected interface IMessageRenderer {
+		Task<IMessage> SendMessageAsync(EntityId channelId, object contents, EntityId? responseTo);
+		Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, object contents);
+	}
+	
+	protected interface IMessageRenderer<in T> {
+		Task<IMessage> SendMessageAsync(EntityId channelId, T contents, EntityId? responseTo);
+		Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, T contents);
+	}
+
+	public abstract class MessageRenderer<TChatClient, TMessage> : IMessageRenderer<TMessage>, IMessageRenderer where TChatClient : ChatClient {
+		protected TChatClient ChatClient { get; }
+		
+		protected MessageRenderer(TChatClient chatClient) {
+			ChatClient = chatClient;
+		}
+		
+		Task<IMessage> IMessageRenderer.SendMessageAsync(EntityId channelId, object contents, EntityId? responseTo) => this.SendMessageAsync(channelId, (TMessage) contents, responseTo);
+		Task<IMessage> IMessageRenderer.UpdateMessageAsync(EntityId channelId, EntityId messageId, object contents) => this.UpdateMessageAsync(channelId, messageId, (TMessage) contents);
+
+		Task<IMessage> IMessageRenderer<TMessage>.SendMessageAsync(EntityId channelId, TMessage contents, EntityId? responseTo) => this.SendMessageAsync(channelId, contents, responseTo);
+		Task<IMessage> IMessageRenderer<TMessage>.UpdateMessageAsync(EntityId channelId, EntityId messageId, TMessage contents) => this.UpdateMessageAsync(channelId, messageId, contents);
+
+		protected abstract Task<IMessage> SendMessageAsync(EntityId channelId, TMessage contents, EntityId? responseTo);
+		protected abstract Task<IMessage> UpdateMessageAsync(EntityId channelId, EntityId messageId, TMessage contents);
+	}
 }

@@ -19,7 +19,4 @@ public class RevcordCommandContext : CommandContext {
 		Member = message.AuthorMember;
 		Client = message.Client;
 	}
-
-	public Task<IMessage> RespondAsync(MessageBuilder messageBuilder) => Message.SendReplyAsync(messageBuilder);
-	public Task<IMessage> RespondAsync(string message) => Message.SendReplyAsync(message);
 }

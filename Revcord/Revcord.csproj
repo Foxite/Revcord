@@ -16,6 +16,7 @@
     <ItemGroup>
       <PackageReference Include="DSharpPlus" Version="4.3.0" />
       <PackageReference Include="Foxite.Common" Version="1.9.0" />
+      <PackageReference Include="Foxite.Text" Version="0.3.0" />
       <PackageReference Include="Ulid" Version="1.2.6" />
     </ItemGroup>
     
