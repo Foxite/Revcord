@@ -3,5 +3,6 @@
   &lt;TestAncestor&gt;
     &lt;TestId&gt;NUnit3x::8BAAF135-9397-467C-8229-F20CAA5F8CCE::net7.0::Revcord.Tests.EntityIdJsonConverterTests&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::C54C4A0F-9BD2-40A1-9FCB-618F24F7C627::net6.0::Revcord.EntityFramework.Tests.EntityIdConversionTests&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::8BAAF135-9397-467C-8229-F20CAA5F8CCE::net7.0::Revcord.Tests.RevoltEmojiTests.Test&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

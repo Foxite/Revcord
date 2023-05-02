@@ -28,4 +28,9 @@
         <ProjectReference Include="..\..\RevoltSharp\RevoltSharp\RevoltSharp.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Revolt\Entities\RevoltEmojiNames.json" />
+      <Resource Include="Revolt\Entities\RevoltEmojiNames.json" />
+    </ItemGroup>
+
 </Project>

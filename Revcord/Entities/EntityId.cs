@@ -6,7 +6,7 @@ namespace Revcord.Entities;
 
 [JsonConverter(typeof(EntityIdJsonConverter))]
 public readonly record struct EntityId {
-	public object UnderlyingId { get; init; }
+	public object UnderlyingId { get; }
 	
 	private EntityId(object underlyingId) {
 		if (underlyingId == null) {
